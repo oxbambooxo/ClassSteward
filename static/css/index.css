@@ -1,0 +1,33 @@
+body {
+  min-height: 600px;
+  padding-top: 0px;
+}
+.nav.navbar-nav.navbar-right .dropdown-menu li
+{
+    cursor:pointer;
+}
+ul li a
+{
+    cursor:pointer;
+}
+.navbar-form .form-control
+{
+	width:100px;
+}
+.pagination li a
+{
+	cursor:pointer;
+}
+
+@font-face {
+    font-family:Forte; 
+    src: url("/static/fonts/forte.ttf");
+}
+
+/*forum中editor尾部样式*/
+#scrolleditor{
+    height: 17px;
+    background-image: url("/static/img/scrolleditor.img");
+    background-position:center;
+    background-repeat: no-repeat;
+}

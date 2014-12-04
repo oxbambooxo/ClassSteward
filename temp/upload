@@ -1,0 +1,215 @@
+{% extends "index" %}
+{% block navbar_left %}
+    <li><a href="/syllabus"><span class="glyphicon glyphicon-th-list"></span> 课程简介</a></li>
+    <li><a href="/schedule"><span class="glyphicon glyphicon-list-alt"></span> 课程进度</a></li>
+    {% if 'id' in session.keys() and session['id'] < 500%}
+    <li class="active"><a href="/upload"><span class="glyphicon glyphicon-tasks"></span> 作业管理</a></li>
+    {% else %}
+    <li class="active"><a href="/upload"><span class="glyphicon glyphicon-open"></span> 上传作业</a></li>
+    {% endif %}
+    <li><a href="/download"><span class="glyphicon glyphicon-save"></span> 课程资源</a></li>
+    <li><a href="/forum"><span class="glyphicon glyphicon-th-large"></span> 论坛</a></li>
+{% endblock %}
+
+{% block navbar_right %}
+<script src="/static/js/account.js"></script>
+{% if 'id' in session.keys()%}
+{% if session['css'] == '1' %}<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"></div>
+{%else%}<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3"></div>{%endif%}
+<ul class="nav navbar-nav ">
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="{{session['id']}}" class="index_username">{{session['name']}}</span>
+        <span class="glyphicon glyphicon-user"></span>
+      {%if msg!=0%}<span class="badge new_msg"></span>{%endif%}
+      <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu" role="menu">
+      <li {% if session['css'] != '1' %}class="active"{% endif %}><a id="narrowscreen">窄屏版</a></li>
+      <li {% if session['css'] == '1' %}class="active"{% endif %}><a id="widescreen">宽屏版</a></li>
+      <li class="divider"></li>
+      <li {% if msg==0 %}class="active"{% endif %}>
+        <a href="/msg">消息中心 {% if msg!=0 %}<span class="badge new_msg"></span>{% endif %}</a>
+      </li>
+      {%if session['id'] < 500%}<li {% if admin %}class="active"{% endif %}><a href="/admin">管理中心</a></li>{% endif %}
+      <li {% if use %}class="active"{% endif %}><a href="/user">个人设置</a></li>
+      <li class="divider"></li>
+      <li><a href="/logout">退出登录</a></li>
+    </ul>
+  </li>
+</ul>
+{% endif %}
+{% endblock %}
+
+{% block main %}
+{% if 'id' in session.keys()%}
+<script src="/static/js/file.js"></script>
+{% if session['id'] > 500 %}
+<div class="table-responsive collapse in" id="homework_files">
+<table class="table table-hover table-bordered">
+  <tr><th>已上传作业</th><th>所属课程</th><th>周次</th><th>最后提交时间</th></tr>
+  {% for i in range(homework['course']|length)%}
+  <tr class="{{homework['course_id'][i]}}_work" style="display:none;">
+    <td>
+      <span class="glyphicon glyphicon-tag"></span>&nbsp;&nbsp;<a href="/static/file/homework/{{homework['course'][i]}}/{{homework['week'][i]}}/{{homework['class'][i]}}/{{homework['filename'][i]}}">{{homework['filename'][i]}}</a>
+      <span style="float:right;">(提交次数:{{homework['total'][i]}}次{%if homework['score'][i]%},所得分数:<strong>{{homework['score'][i]}}</strong>分{%endif%})</span>
+    </td>
+    <td>{{homework['course'][i]}}</td>
+    <td>第{{homework['week'][i]}}周</td>
+    <td>{{homework['time'][i]}}</td>
+  </tr>
+  {% endfor %}
+  <tr>
+    <form action="/file" method="POST" enctype="multipart/form-data" id="homework_submit">
+    <td><input type="file" name="homework" />
+        <span class="help-block name_help week_help">提交文件：<strong></strong>(文件将被自动命名)</span>
+        <input type="hidden" name="homework_name" value="" />
+    </td>
+    <td><select class="form-control input-sm course_select" name="course"></select>
+        <span class="help-block">请选择相关课程上传本周作业</span>
+    </td>
+    <td><select class="form-control input-sm week_select" name="week"></select></td>
+    <td><button class="btn btn-default push_homework">提交</button></td>
+    </form>
+  </tr>
+</table>
+</div>
+{% endif %}
+{% if session['id'] < 500 %}
+<div class="panel panel-default">
+    <div class="panel-heading" data-toggle="collapse" data-target="#file_browse" aria-expanded="true" aria-controls="file_browse">
+      <h3 class="panel-title">浏览作业文件 :</h3>
+    </div>
+    <div class="table-responsive collapse in" id="file_browse">
+    <table class="table table-hover table-bordered">
+      <tr>
+        <td>
+          <table style="display:inline;">
+          <tr>
+            <td width="30%"><select class="form-control input-sm file_course_select"></select></td>
+            <td width="30%"><select class="form-control input-sm file_week_select"></select></td>
+            <td width="30%"><select class="form-control input-sm file_class_select"></select></td>
+          </tr>
+          </table>
+        </td>
+        <td colspan="3"><button class="btn btn-danger delete_directory" style="float:right;">删除目录</button></td>
+      </tr>
+      <tr>
+        <th class="sort_filename" style="cursor:pointer;">文件名</th>
+        <th class="sort_score" style="cursor:pointer;" width="5%">分数</th>
+        <th width="6%">共提交</th>
+        <th class="sort_time" style="cursor:pointer;">最后上交时间</th>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <button class="btn btn-default file_download" style="float:right;">打包下载</button>
+          <span class="total_help text-primary" style="float:right;font-size:18px;"></span>
+        </td>
+      </tr>
+    </table>
+    </div>
+</div>
+
+<script src="/static/js/highcharts.js"></script>
+<script src="/static/js/exporting.js"></script>
+<script src="/static/js/draw.js"></script>
+<!--<script src="/static/js/sand-signika.js"></script>-->
+
+<div class="panel panel-default">
+    <div class="panel-heading" data-toggle="collapse" data-target="#score_count" aria-expanded="true" aria-controls="score_count">
+      <h3 class="panel-title">成绩统计 :</h3>
+    </div>
+    <div class="table-responsive collapse in" id="score_count">
+    <table class="table table-hover table-bordered">
+      <tr><div id="chart" style="margin-top:50px;"></div></tr>
+      <tr>
+        <td>
+        <table width="100%" border="1">
+          <tr>
+            <td width="50%">
+              <ul style="list-style-type:none;padding:10px 0px 0px 10px;">
+              {%for i in range(course|length)%}
+              <li class="radio-inline"><label><input type="radio" name="course" value="{{course[i]}}" />{{course[i]}}</label></li>
+              {%endfor%}
+              </ul>
+            </td>
+            <td width="50%">
+              {%for i in range(user_class|length)%}
+              <label style="margin-left:10px;"><input type="checkbox" name="class" value="{{user_class[i]}}"> {{user_class[i]}}</label>
+              {%endfor%}
+            </td>
+          </tr>
+        </table>
+        </td>
+        <td width="20%"><button class="btn btn-default draw_course" style="margin:5px 0px 0px 5px;">绘制课程每周成绩统计图</button></td>
+      </tr>
+      <tr>
+        <td>
+        <table width="100%" border="1">
+          <tr>
+            <td width="50%">
+              <ul style="list-style-type:none;padding:10px 0px 0px 10px;">
+              {%for i in range(user_class|length)%}
+              <li class="radio-inline"><label><input type="radio" name="class" value="{{user_class[i]}}" />{{user_class[i]}}</label></li>
+              {%endfor%}
+              </ul>
+            </td>
+            <td width="50%">
+              {%for i in range(course|length)%}
+              <label style="margin-left:10px;"><input type="checkbox" name="course" value="{{course[i]}}"> {{course[i]}}</label>
+              {%endfor%}
+            </td>
+          </tr>
+        </table>
+        </td>
+        <td width="20%"><button class="btn btn-default draw_class" style="margin:5px 0px 0px 5px;">绘制班级个人成绩统计图</button></td>
+      </tr>
+      <tr>
+        <td>
+        <table width="100%" border="1">
+          <tr>
+            <td width="50%">
+              <select width="30%" class="input-xs user_class" style="margin:10px 0px 10px 10px;">
+                {%for i in range(user_class|length)%}
+                  <option value="{{user_class[i]}}">{{user_class[i]}}</option>
+                {%endfor%}
+              </select>
+              <select width="30%" class="input-xs user_num"></select>
+              <select width="30%" class="input-xs user_name"></select>
+            </td>
+            <td width="50%">
+              {%for i in range(course|length)%}
+              <label style="margin-left:10px;"><input type="checkbox" name="course" value="{{course[i]}}"> {{course[i]}}</label>
+              {%endfor%}
+            </td>
+          </tr>
+        </table>
+        </td>
+        <td width="20%"><button class="btn btn-default draw_user" style="margin:5px 0px 0px 5px;">绘制个人每周成绩统计图</button></td>
+      </tr>
+    </table>
+    </div>
+</div>
+{% endif %}
+{% else %}
+<table width="100%" style="margin-top:10px;">
+<tr>
+<td width="30%"></td>
+<td width="40%">
+<form role="form" action="account" method="POST" data-placement="left" data-content="">
+  <div class="form-group">
+    <input type="text" placeholder="账号" class="form-control" id="account" name="account">
+  </div>
+  <div class="form-group">
+    <input type="password" placeholder="密码" class="form-control" id="passwd" name="passwd">
+  </div>
+  <button type="button" class="btn btn-success" id="submit">登录</button>
+  <a href="/regist" class="btn">注册</a><span class="help-block" style="float:right;">请登录后上传作业</span>
+</form>
+</td>
+<td width="30%"></td>
+</tr>
+</table>
+<script src="/static/js/md5.js"></script>
+{% endif %}
+
+{% endblock %}

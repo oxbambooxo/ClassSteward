@@ -1,0 +1,194 @@
+{% extends "index" %}
+{% block navbar_left %}
+    <li class="active"><a href="/syllabus"><span class="glyphicon glyphicon-th-list"></span> &#35838;&#31243;&#31616;&#20171;</a></li>
+    <li><a href="/schedule"><span class="glyphicon glyphicon-list-alt"></span> &#35838;&#31243;&#36827;&#24230;</a></li>
+    {% if 'id' in session.keys() and session['id'] < 500%}
+    <li><a href="/upload"><span class="glyphicon glyphicon-tasks"></span> &#20316;&#19994;&#31649;&#29702;</a></li>
+    {% else %}
+    <li><a href="/upload"><span class="glyphicon glyphicon-open"></span> &#19978;&#20256;&#20316;&#19994;</a></li>
+    {% endif %}
+    <li><a href="/download"><span class="glyphicon glyphicon-save"></span> &#35838;&#31243;&#36164;&#28304;</a></li>
+    <li><a href="/forum"><span class="glyphicon glyphicon-th-large"></span> &#35770;&#22363;</a></li>
+{% endblock %}
+{% block main %}
+<script src="/static/js/schedule.js"></script>
+{% if 'id' in session.keys() and session['id'] < 500 %}
+<div class="panel panel-default">
+    <div class="panel-heading" data-toggle="collapse" data-target="#course_syllabus" aria-expanded="true" aria-controls="course_syllabus"><h3 class="panel-title">&#35838;&#31243;&#31616;&#20171; :</h3></div>
+    <div class="table-responsive collapse in" id="course_syllabus">
+    <table class="table table-hover table-bordered table-condensed">
+        <tr><th>&#35838;&#31243;&#21517;&#31216;</th><th>&#25152;&#23646;&#29677;&#32423;</th><th>&#25480;&#35838;&#32769;&#24072;</th></tr>
+        {% for i in range(course['name']|length)%}
+        <tr>
+            <td class="course_check">{{course['name'][i]}}</td>
+            <td>{{course['class'][i]}}</td>
+            <td>
+                {{course['teacher'][i]}}
+                <input type="button" class="btn btn-default delete_course" value="&#21024;&#38500;" style="float:right;" />
+            </td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td><input type="text" class="form-control" value="" name="course_name" placeholder="&#36755;&#20837;&#35838;&#31243;&#30340;&#21517;&#31216;" /></td>
+            <td>
+                <input type="text" class="form-control" value="" name="course_class" placeholder="&#25152;&#23646;&#29677;&#32423;&#30340;&#21517;&#31216;" data-toggle="popover" data-placement="top" data-content="" list="class_list" />
+                <datalist id="class_list">
+                {% for i in range(course['name']|length)%}
+                <option label="{{course['class'][i]}}" value="{{course['class'][i]}}" />
+                {% endfor %}
+                </datalist>
+            </td>
+            <td>
+                <input type="text" class="form-control" value="" name="course_teacher" placeholder="&#25480;&#35838;&#32769;&#24072;" style="width: 50%;display:inline;" />
+                <input type="button" class="btn btn-default new_course" value="&#28155;&#21152;" style="float:right;" />
+            </td>
+        </tr>
+    </table>
+    </div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading" data-toggle="collapse" data-target="#course_syllabus_detail" aria-expanded="true" aria-controls="course_syllabus_detail"><h3 class="panel-title">&#25945;&#23398;&#22823;&#32434; :</h3></div>
+{% endif %}
+<div id="course_syllabus_detail">
+  <ul class="nav nav-tabs" role="tablist">
+  {% for i in range(course['name']|length)%}
+    <li {% if i==0 %} class="active" {% endif %} ><a href="#course_{{course['id'][i]}}" role="tab" data-toggle="tab">{{course['name'][i]}}</a></li>
+  {% endfor %}
+  </ul>
+  <div class="tab-content">
+  {% for i in range(course['name']|length)%}
+    <div class="table-responsive tab-pane fade in {% if i==0 %} active {% endif %}" id="course_{{course['id'][i]}}" course="{{course['name'][i]}}">
+      <table class="table table-hover table-bordered" style="margin-bottom:0px;">
+      {% for j in range(syllabus['name']|length)%}
+      {% if syllabus['name'][j] == course['name'][i] %}
+            <tr syllabus="{{syllabus['id'][j]}}">
+              <td width="10%">
+                <div style="position:relative;">
+                  <span>{{syllabus['head'][j]}}</span>
+                  {% if 'id' in session.keys() and session['id'] < 500 %}
+                  <input type="text" class="form-control" placeholder="&#22635;&#20889;&#26631;&#39064;" style="display:none;" />
+                  <button type="button" class="btn btn-xs btn-default modify_syllabus_head" style="position:absolute;bottom:0px;left:0px;">&#20462;&#25913;</button>
+                  {% endif %}
+                </div>
+              </td>
+              <td>
+                <div class="syllabus_detail">{{syllabus['detail'][j]}}</div>
+                {% if 'id' in session.keys() and session['id'] < 500 %}
+                <button type="button" class="btn btn-xs btn-default modify_syllabus_detail" style="float:left;">&#20462;&#25913;</button>
+                <button type="button" class="btn btn-xs btn-default delete_syllabus" style="float:right;">&#21024;&#38500;</button>
+                {% endif %}
+              </td>
+            </tr>
+      {% endif %}
+      {% endfor %}
+      {% if 'id' in session.keys() and session['id'] < 500 %}
+      <tr><td width="15%"><input type="text" class="form-control" name="syllabus_head" placeholder="&#22635;&#20889;&#26631;&#39064;"/></td>
+          <td width="85%">
+            <input type="text" class="form-control" name="syllabus_detail" placeholder="&#22635;&#20889;&#20869;&#23481;" data-toggle="modal" data-target="#syllabus_editor"/>
+            <button class="btn btn-info btn-sm new_syllabus" style="float:right;">&#28155;&#21152;</button>
+          </td>
+      </tr>
+      {% endif %}
+      </table>
+    </div>
+  {% endfor %}
+  </div>
+</div>
+{% if 'id' in session.keys() and session['id'] < 500 %}
+</div>
+<div class="modal fade" style="width:100%" id="syllabus_editor" tabindex="-1" role="dialog" aria-labelledby="syllabus_edit" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <strong class="modal-title" id="syllabus_edit">&#32534;&#36753;&#22823;&#32434;&#20869;&#23481;&#65306;</strong>
+      </div>
+      <div class="modal-body">
+      <link href="/static/css/font-awesome.min.css" rel="stylesheet">
+      <link href="/static/css/edit.css" rel="stylesheet">
+      <script src="/static/js/jquery.hotkeys.js"></script>
+      <script src="/static/js/google-code-prettify/prettify.js"></script>
+      <script src="/static/js/bootstrap-wysiwyg.js"></script>
+        <div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor">
+          <div class="btn-group">
+          <a class="btn dropdown-toggle" data-toggle="dropdown" title="&#23383;&#20307;&#26679;&#24335;"><i class="icon-font"></i><b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li><a data-edit="fontName SimSun" style="font-family:SimSun">&#23435;&#20307;</a></li>
+            <li><a data-edit="fontName SimHei" style="font-family:SimHei">&#40657;&#20307;</a></li>
+            <li><a data-edit="fontName Microsoft YaHei" style="font-family:Microsoft YaHei">&#24494;&#36719;&#38597;&#40657;</a></li>
+            <li><a data-edit="fontName FangSong" style="font-family:FangSong">&#20223;&#23435;</a></li>
+            <li><a data-edit="fontName KaiTi" style="font-family:KaiTi">&#26999;&#20307;</a></li>
+            <li><a data-edit="fontName Courier New" style="font-family:Courier New">Courier New</a></li>
+            <li><a data-edit="fontName Comic Sans MS" style="font-family:Comic Sans MS">Comic Sans MS</a></li>
+            <li><a data-edit="fontName Impact" style="font-family:Impact">Impact</a></li>
+            <li><a data-edit="fontName Lucida Sans" style="font-family:Lucida Sans">Lucida Sans</a></li>
+            <li><a data-edit="fontName Tahoma" style="font-family:Tahoma">Tahoma</a></li>
+          </ul>
+          </div>
+          <div class="btn-group">
+          <a class="btn dropdown-toggle" data-toggle="dropdown" title="&#23383;&#20307;&#22823;&#23567;"><i class="icon-text-height"></i><b class="caret"></b></a>
+            <ul class="dropdown-menu">
+            <li><a data-edit="fontSize 5"><font size="5">&#36739;&#22823;&#23383;&#20307;</font></a></li>
+            <li><a data-edit="fontSize 3"><font size="3">&#26222;&#36890;&#23383;&#20307;</font></a></li>
+            <li><a data-edit="fontSize 1"><font size="1">&#36739;&#23567;&#23383;&#20307;</font></a></li>
+            </ul>
+          </div>
+          <div class="btn-group">
+          <a class="btn dropdown-toggle" data-toggle="dropdown" title="&#23383;&#20307;&#39068;&#33394;"><i class="icon-magic"></i><b class="caret"></b></a>
+            <ul class="dropdown-menu">
+            <li><a data-edit="ForeColor #000000" style="color:rgb(0,0,0)">&#40657; #000000</a></li>
+            <li><a data-edit="ForeColor #FF0000" style="color:rgb(255,0,0)">&#32418; #FF0000</a></li>
+            <li><a data-edit="ForeColor #FF8000" style="color:rgb(255,128,0)">&#27225; #FF8000</a></li>
+            <li><a data-edit="ForeColor #FFFF00" style="color:rgb(255,255,0)">&#40644; #FFFF00</a></li>
+            <li><a data-edit="ForeColor #00FF00" style="color:rgb(0,255,0)">&#32511; #00FF00</a></li>
+            <li><a data-edit="ForeColor #0000FF" style="color:rgb(0,0,255)">&#34013; #0000FF</a></li>
+            <li><a data-edit="ForeColor #8000FF" style="color:rgb(128,0,255)">&#32043; #8000FF</a></li>
+            </ul>
+          </div>
+          <div class="btn-group">
+            <a class="btn" data-edit="bold" title="&#21152;&#31895; (Ctrl/Cmd+B)"><i class="icon-bold"></i></a>
+            <a class="btn" data-edit="italic" title="&#26012;&#20307; (Ctrl/Cmd+I)"><i class="icon-italic"></i></a>
+            <a class="btn" data-edit="strikethrough" title="&#21024;&#38500;&#32447;"><i class="icon-strikethrough"></i></a>
+            <a class="btn" data-edit="underline" title="&#19979;&#21010;&#32447; (Ctrl/Cmd+U)"><i class="icon-underline"></i></a>
+          </div>
+          <div class="btn-group">
+            <a class="btn" data-edit="insertunorderedlist" title="&#26080;&#24207;&#21015;&#34920;"><i class="icon-list-ul"></i></a>
+            <a class="btn" data-edit="insertorderedlist" title="&#32534;&#21495;&#21015;&#34920;"><i class="icon-list-ol"></i></a>
+            <a class="btn" data-edit="outdent" title="&#21521;&#24038;&#32553;&#36827; (Shift+Tab)"><i class="icon-indent-left"></i></a>
+            <a class="btn" data-edit="indent" title="&#21521;&#21491;&#32553;&#36827; (Tab)"><i class="icon-indent-right"></i></a>
+          </div>
+          <div class="btn-group">
+            <a class="btn" data-edit="justifyleft" title="&#24038;&#23545;&#40784; (Ctrl/Cmd+L)"><i class="icon-align-left"></i></a>
+            <a class="btn" data-edit="justifycenter" title="&#23621;&#20013;&#23545;&#40784; (Ctrl/Cmd+E)"><i class="icon-align-center"></i></a>
+            <a class="btn" data-edit="justifyright" title="&#21491;&#23545;&#40784; (Ctrl/Cmd+R)"><i class="icon-align-right"></i></a>
+            <a class="btn" data-edit="justifyfull" title="&#20004;&#31471;&#23545;&#40784; (Ctrl/Cmd+J)"><i class="icon-align-justify"></i></a>
+          </div>
+          <div class="btn-group">
+              <a class="btn dropdown-toggle" data-toggle="dropdown" title="&#36229;&#38142;&#25509;"><i class="icon-link"></i></a>
+                <div class="dropdown-menu input-append">
+                    <input class="span2" placeholder="URL" type="text" data-edit="createLink"/>
+                    <button class="btn" type="button">Add</button>
+                </div>
+              <a class="btn" data-edit="unlink" title="&#31227;&#38500;&#38142;&#25509;"><i class="icon-cut"></i></a>
+          </div>
+          <div class="btn-group">
+            <a class="btn" title="&#25554;&#20837;&#22270;&#29255;,&#25903;&#25345;&#25302;&#25341; (or just drag & drop)" id="pictureBtn"><i class="icon-picture"></i></a>
+            <input type="file" data-role="magic-overlay" data-target="#pictureBtn" data-edit="insertImage" style="opacity: 0; position: absolute; top: 0px; left: 0px; width: 41px; height: 34px;" />
+          </div>
+          <div class="btn-group">
+            <a class="btn" data-edit="undo" title="Undo (Ctrl/Cmd+Z)"><i class="icon-reply"></i></a>
+            <a class="btn" data-edit="redo" title="Redo (Ctrl/Cmd+Y)"><i class="icon-share-alt"></i></a>
+          </div>
+          <input type="text" data-edit="inserttext" id="voiceBtn" x-webkit-speech="" >
+        </div>
+        <div id="editor" contenteditable="true"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default btn-sm cancel_submit" data-dismiss="modal">&#21462;&#28040;</button>
+        <button type="button" class="btn btn-primary btn-sm syllabus_confirm" data-dismiss="modal">&#30830;&#23450;</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

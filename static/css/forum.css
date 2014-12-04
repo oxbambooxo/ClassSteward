@@ -1,0 +1,13 @@
+.nav.nav-pills.nav-justified
+{
+    margin-bottom: 9px;
+}
+.table.table-hover.table-bordered tr td span
+{
+    float: right;
+    cursor: pointer;
+}
+.table.table-hover.table-bordered
+{
+    margin-bottom: 0px;
+}

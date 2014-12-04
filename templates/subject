@@ -1,0 +1,132 @@
+{% extends "forum" %}
+{% block breadcrumb %}
+<ol class="breadcrumb">
+  {% set forum_length = forum['id']|length %}
+  {% for i in range(forum_length) %}
+  {% if forum['id'][i] == subject %}
+  <li><a href="/index">&#20027;&#39029;</a></li>
+  <li><a href="/forum">&#35770;&#22363;</a></li>
+  <li><a href="/forum/{{forum['name'][i]}}">{{forum['nickname'][i]}}</a></li>
+  <li class="active">{{topic['title']}}</li>
+  <i id="topic" style="display:none">{{topic['id']}}</i>
+  <i id="subject" style="display:none">{{subject}}</i>
+  {% endif %}
+  {% endfor %}
+</ol>
+{% endblock %}
+{% block subject %}{% endblock %}
+{% block topic %}
+<link href="/static/css/message.css" rel="stylesheet">
+<link href="/static/css/subject.css" rel="stylesheet">
+<script src="/static/js/roll_reply_page.js"></script>
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" >
+    <section class="messages">
+    {% set comment_length = comment['author_name']|length %}
+    {% for i in range(comment_length) %}
+    <article class="message">
+        <a class="message-img"><img src="/static/img/photo/{{comment['author_photo'][i]}}.jpg" alt="" width="50" height="50"></a>
+        <div class="message-body" id="stair_{{i+2}}">
+          <div class="text" style="padding:10px 10px 20px 10px;">
+            <div>{{comment['content'][i]}}</div>
+            {%if 'id' in session.keys() and (session['id'] < 500 or session['id'] == comment['author'][i])%}
+              <a class="modify_comment" style="float:right;cursor:pointer;" id="{{comment['id'][i]}}">&#32534;&#36753;</a>
+            {%endif%}
+          </div>
+          <p class="attribution"><a>{{comment['author_name'][i]}}</a> {{comment['time'][i]}}
+          <i class="icon-comment"></i>
+          <span>{%if comment['last_time'][i]%}&#26368;&#21518;&#32534;&#36753;&#20110;: {{comment['last_time'][i]}}{%endif%}&nbsp;&nbsp;{{page+i+1}}&#27004; </span>
+          </p>
+          {% if 'id' in session.keys() and session['id'] < 500 %}
+            <button type="button" class="close delete_comment_confirm"><span aria-hidden="true">&times;</span></button>
+            <div style="position:relative;display:none;">
+            <div class="alert alert-danger" role="alert" style="position:absolute;right:0px;bottom:0px;z-index:99;">&#30830;&#23450;&#21024;&#38500;&#35813;&#22238;&#22797;&#65311;<button type="button" class="btn btn-danger btn-xs delete_comment" comment="{{comment['id'][i]}}">&#30830;&#23450;</button></div>
+            </div>
+          {% endif %}
+        </div>
+        {% for j in range(replys['comment']|length) %}
+        {% if replys['comment'][j] == comment['id'][i] %}
+        <div class="reply-content">
+        {% for k in range(replys['reply'][j]['id']|length) %}
+          <a class="message-img"><img width="50" height="50" style="visibility:hidden;"/></a>
+          <div class="message-body">
+            <div class="text">{{replys['reply'][j]['content'][k]}}
+            {% if 'id' in session.keys() and session['id'] < 500 %}
+              <button type="button" class="close delete_reply_confirm"><span aria-hidden="true">&times;</span></button>
+              <div style="position:relative;display:none;">
+                <div class="alert alert-danger" role="alert" style="position:absolute;right:0px;z-index:99;">&#26159;&#21542;&#21024;&#38500;&#35813;&#24555;&#25463;&#22238;&#22797;&#65311;<button type="button" class="btn btn-danger btn-xs delete_reply" reply="{{replys['reply'][j]['id'][k]}}">&#30830;&#23450;</button>
+                </div>
+              </div>
+            {% endif %}
+            </div>
+            <p class="attribution"><a>{{replys['reply'][j]['author'][k]}}</a> {{replys['reply'][j]['time'][k]}}</p>
+          </div>
+          {% endfor %}
+          </div>
+          {% set re_count = replys['count'][j] %}
+          {% set re_maxpage = re_count//5+1 if (re_count//5)%5 != 0 else re_count//5 %}{# &#22238;&#22797;&#20197;5&#26465;&#26469;&#20998;&#39029; #}
+          {% if re_maxpage > 0 %}
+          <a class="message-img"><img width="50" height="50" style="visibility:hidden;"></a>
+          <div class="message-body">
+            <ul class="pagination col-lg-12 col-md-12 col-sm-12 col-xs-12">
+              <li class="active"><a comment="{{comment['id'][i]}}">1</a></li>
+              {% for g in range(re_maxpage-1) %}
+                <li><a comment="{{comment['id'][i]}}">{{g+2}}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+        {% endif %}
+        {% endfor %}
+        <div class="reply-boxs" style="display:none;">
+        <a class="message-img"><img width="50" height="50" style="visibility:hidden;"></a>
+        <div class="message-body">
+          <div class="text">
+            <input type="text" class="form-control" placeholder="&#24555;&#36895;&#22238;&#22797;">
+            <button type="button" class="btn btn-default btn-xs fast_reply" comment="{{comment['id'][i]}}">&#22238;&#22797;</button>
+          </div>
+        </div>
+        </div>
+    </article>
+    {% endfor %}
+    </section>
+</div>
+<ul class="pagination col-lg-12 col-md-12 col-sm-12 col-xs-12">
+  {% set maxdivide = 27 %}{# &#39029;&#38754;&#26174;&#31034;&#20998;&#39029;&#30340;&#26368;&#22823;&#20998;&#39029;&#20010;&#25968;,&#26368;&#22909;&#20026;&#22855;&#25968;,&#20004;&#36793;&#20026;&#30465;&#30053;&#21495;&#30340;&#24773;&#20917;&#26102;&#21487;&#20197;&#26377;maxdivide//2 #}
+  {% set maxpage = count//divide+1 if (count//divide)%divide != 0 else count//divide %}{# &#19968;&#20849;&#26377;&#22810;&#23569;&#39029;&#25968; #}
+  {% if maxpage > 0 %}
+  {% if page < divide %}<li><a>&laquo;</a></li>
+  {% else %}<li><a href="/forum/{{subject}}/{{topic['id']}}?p={{page-divide}}">&laquo;</a></li>
+  {% endif %}
+  {% for i in range(maxpage) %} 
+    {% if page/divide <= maxdivide %}
+      {% if i != page/divide and i<=divide %}<li><a href="/forum/{{subject}}/{{topic['id']}}?p={{i*divide}}">{{i}}</a></li>{% endif %}
+      {% if i == page/divide %}<li class="active"><a>{{i}}</a></li>{% endif %}
+      {% if i >= maxdivide and i-1 == maxdivide %}<li><a href="/forum/{{subject}}/{{topic['id']}}?p={{i*divide}}">..</a></li>{% endif %}
+      {% if i == maxpage and maxpage > maxdivide %}<li><a href="/forum/{{subject}}/{{topic['id']}}?p={{maxpage*divide}}">{{i}}</a></li>{% endif %}
+    {% endif %}
+    {% if page/divide > maxdivide and page/divide < maxpage-maxdivide and maxpage > maxdivide %}
+      {% if i == 0 %}<li><a href="/forum/{{subject}}/{{topic['id']}}?p={{i*divide}}">{{i}}</a></li>{% endif %}
+      {% if i-1 == maxdivide %}<li><a href="/forum/{{subject}}/{{topic['id']}}?p={{page-(maxdivide//2)*divide}}">..</a></li>{% endif %}
+      {% if i != page/divide and i > (page/divide)-(maxdivide//2) and i < (page/divide)+(maxdivide//2) %}<li><a href="/forum/{{subject}}/{{topic['id']}}?p={{i*divide}}">{{i}}</a></li>{% endif %}
+      {% if i == page/divide %}<li class="active"><a>{{i}}</a></li>{% endif %}
+      {% if i+1 == maxdivide %}<li><a href="/forum/{{page+(maxdivide//2)*divide}}">..</a></li>{% endif %}
+      {% if i == maxdivide %}<li><a href="/forum/{{subject}}/{{topic['id']}}?p={{maxpage*divide}}">{{i}}</a></li>{% endif %}
+    {% endif %}
+    {% if (page/divide >= maxpage-maxdivide or page/divide == maxdivide) and maxpage > maxdivide %}
+      {% if i==0 %}<li><a href="/forum/{{subject}}/{{topic['id']}}?p={{i*divide}}">{{i}}</a></li>{% endif %}
+      {% if i+1 == maxdivide %}<li><a href="/forum/{{subject}}/{{topic['id']}}?p={{i*divide}}">{{i}}</a></li>{% endif %}
+      {% if i != page/divide and i >= maxpage-maxdivide %}<li><a href="/forum/{{subject}}/{{topic['id']}}?p={{i*divide}}">{{i}}</a></li>{% endif %}
+      {% if i == page/divide %}<li class="active"><a>{{i}}</a></li>{% endif %}
+    {% endif %}
+  {% endfor %}
+  {% if page+divide < count %}<li><a href="/forum/{{subject}}/{{topic['id']}}?p={{page+divide}}">&raquo;</a></li>
+  {% else %}<li><a>&raquo;</a></li>
+  {% endif %}
+  {% endif %}
+</ul>
+{% endblock %}
+{% block pronounce_js %}<script src="/static/js/subject.js"></script>{% endblock %}
+{% block pronounce_input %}{% endblock %}
+{% block pronounce_button %}
+<button type="button" class="btn btn-info col-lg-1 col-md-1 col-sm-1 col-xs-1" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-content="" data-loading-text="&#27491;&#22312;&#25552;&#20132;..." id="publish">&#22238;&#22797;</button>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends "index" %}
+{% block title %}
+  {% if status == 'success' %}
+    law's courses &#27880;&#20876;&#25104;&#21151;
+  {% else %}
+    law's courses &#27426;&#36814;&#27880;&#20876;
+  {% endif %}
+{% endblock %}
+{% block navbar_right %}{% endblock %}
+{% block main %}
+<div class="jumbotron">
+<script src="/static/js/regist.js"></script>
+  {% if status != 'success'%}
+    <form role="form" action="/regist" method="POST" enctype="multipart/form-data">
+      {%for i,quest in enumerate(regist['question'])%}
+      <div class="form-group has-feedback question {%if status=='failed'%}has-error{%endif%}">
+        <label for="answer_{{i}}">&#27880;&#20876;&#38382;&#39064;{%if regist['question']|length>1%}{{i+1}}{%endif%}:</label>
+        <span>{{quest}}</span>
+        <input type="hidden" name="question_{{i}}" value="{{quest}}">
+        <input type="text" class="form-control" id="answer_{{i}}" name="answer_{{i}}" placeholder="&#36755;&#20837;&#27880;&#20876;&#38382;&#39064;&#31572;&#26696;">
+        <span class="glyphicon form-control-feedback"></span>
+      </div>
+      {%endfor%}
+      <div class="form-group has-feedback">
+        <label for="user_account">&#36134;&#21495;</label>
+        <input type="text" class="form-control" id="user_account" name="user_account" placeholder="&#36755;&#20837;&#29992;&#25143;&#21517;">
+        <span class="glyphicon form-control-feedback"></span>
+        <span class="help-block" id="account_help"></span>
+      </div>
+      <div class="form-group has-feedback">
+        <label for="user_passwd">&#23494;&#30721;</label>
+        <input type="password" class="form-control" id="user_passwd" name="user_passwd" placeholder="&#36755;&#20837;&#23494;&#30721;">
+        <span class="glyphicon form-control-feedback"></span>
+        <span class="help-block" id="passwd_help"></span>
+      </div>
+      <div class="form-group has-feedback">
+        <label for="user_name">&#22995;&#21517;</label>
+        <input type="text" class="form-control" id="user_name" name="user_name" placeholder="&#36755;&#20837;&#30495;&#23454;&#22995;&#21517;">
+        <span class="glyphicon form-control-feedback"></span>
+        <span class="help-block" id="name_help"></span>
+      </div>
+      <div class="form-group has-feedback">
+        <label for="class_name">&#36873;&#25321;&#29677;&#32423;</label>
+        <select id="class_name" name="class_name" class="form-control">
+          {%for i in range(regist['userclass']|length)%}
+          <option value="{{regist['userclass'][i]}}">{{regist['userclass'][i]}}&#29677;</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group has-feedback">
+        <label for="user_num">&#23398;&#21495;</label>
+        <input type="text" class="form-control" id="user_num" name="user_num" placeholder="&#36755;&#20837;&#23398;&#21495;&#21518;&#20004;&#20301;">
+        <span class="glyphicon form-control-feedback"></span>
+        <span class="help-block" id="num_help"></span>
+      </div>
+      <div class="form-group" style="display:none;">
+        <label for="user_photo">&#19978;&#20256;&#22836;&#20687;</label>
+        <input type="file" id="user_photo" name="user_photo">
+        <span class="help-block" id="photo_help">&#25903;&#25345;&#25991;&#20214;&#22823;&#23567;&#23567;&#20110;500K&#30340; png, gif, jpg, jpeg&#26684;&#24335;&#22270;&#29255;&#65292;&#25512;&#33616;&#22823;&#23567;&#20026;200x200&#12290;</span>
+      </div>
+      <input type="hidden" id="default" name="default" value=0>
+      <button type="button" class="btn btn-default">&#27880;&#20876;</button>
+    </form>
+    <script src="/static/js/md5.js"></script>
+  {% else %}
+    <div class="alert alert-success" role="alert">
+    <p><span class="glyphicon glyphicon-ok-circle"></span>&#27880;&#20876;&#25104;&#21151;&#65292;&#27491;&#22312;&#36339;&#36716;&#22238;&#39318;&#39029; &#8230;&#8230;</p>
+    <div class="progress">
+      <div class="progress-bar progress-bar-striped progress-bar-success active"  role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+      </div>
+    </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock main %}

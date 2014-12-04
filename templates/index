@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Graduation Project">
+    <meta name="author" content="BamBoo">
+    <link href="/static/favicon.ico" rel="shortcut icon">
+    <title>{% block title %}law's courses{% endblock %}</title>
+    <!-- Bootstrap core CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- normalize.css -->
+    <link href="/static/css/normalize.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="/static/css/index.css" rel="stylesheet">
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="/static/js/ie-6-8-respond.js"></script><![endif]-->
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <!-- Bootstrap core JavaScript
+  ================================================== -->
+  <!-- Placed at the end of the document so the pages load faster -->
+  <script src="/static/js/jquery.min.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+  <!-- Loading the jQuery early,make sure sub's page can use jQuery. -->
+  <body {% if 'id' in session.keys() %}style="background-image:url('/static/img/{{session['light']}}.jpg')"{% endif %}>
+    <!-- Fixed navbar -->
+    <div class="navbar navbar-default {%if session['light'] == 'gray'%}navbar-inverse{%endif%}" role="navigation">
+      <!--<div class="container {% if session['css'] == '1' %}col-lg-12 col-md-12 col-sm-12 col-xs-12{% endif %}">-->
+        <div class="container col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        {% if session['css'] != '1' %}<div class="col-lg-2"></div>{% endif %}
+        <div class="navbar-header col-lg-1 col-md-1 hidden-sm hidden-xs" style="padding:0px;width:120px;">
+          <a class="navbar-brand" style="font-family:Forte;font-size:18px;">law's courses</a>
+        </div>
+        <div class="navbar-collapse col-lg-offset-1 col-md-offset-1 col-sm-offset-1 col-xs-offset-1">
+          <ul class="nav navbar-nav">
+            {% block navbar_left %}
+            <li><a href="/syllabus"><span class="glyphicon glyphicon-th-list"></span> &#35838;&#31243;&#31616;&#20171;</a></li>
+            <li><a href="/schedule"><span class="glyphicon glyphicon-list-alt"></span> &#35838;&#31243;&#36827;&#24230;</a></li>
+            {% if 'id' in session.keys() and session['id'] < 500%}
+            <li><a href="/upload"><span class="glyphicon glyphicon-tasks"></span> &#20316;&#19994;&#31649;&#29702;</a></li>
+            {% else %}
+            <li><a href="/upload"><span class="glyphicon glyphicon-open"></span> &#19978;&#20256;&#20316;&#19994;</a></li>
+            {% endif %}
+            <li><a href="/download"><span class="glyphicon glyphicon-save"></span> &#35838;&#31243;&#36164;&#28304;</a></li>
+            <li><a href="/forum"><span class="glyphicon glyphicon-th-large"></span> &#35770;&#22363;</a></li>
+            {% endblock %}
+          </ul>
+          {% block navbar_right %}
+          <script src="/static/js/account.js"></script>
+          {% if session['css'] == '1' %}<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"></div>
+          {%else%}<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3"></div>{%endif%}
+          {% if 'id' in session.keys() %}
+          <ul class="nav navbar-nav ">
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="{{session['id']}}" class="index_username">{{session['name']}}</span>
+                    <span class="glyphicon glyphicon-user"></span>
+                  {%if msg!=0%}<span class="badge new_msg"></span>{%endif%}
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu" role="menu">
+                  <li class="hidden-sm hidden-xs {% if session['css'] != '1' %}active{% endif %}"><a id="narrowscreen">&#31364;&#23631;&#29256;</a></li>
+                  <li class="hidden-sm hidden-xs {% if session['css'] == '1' %}active{% endif %}"><a id="widescreen">&#23485;&#23631;&#29256;</a></li>
+                  <li class="hidden-sm hidden-xs divider"></li>
+                  <li class="hidden-sm hidden-xs {% if msg==0 %}active{% endif %}">
+                    <a href="/msg">&#28040;&#24687;&#20013;&#24515; {% if msg!=0 %}<span class="badge new_msg"></span>{% endif %}</a>
+                  </li>
+                  {%if session['id'] < 500%}<li {% if admin %}class="active"{% endif %}><a href="/admin">&#31649;&#29702;&#20013;&#24515;</a></li>{% endif %}
+                  <li {% if use %}class="active"{% endif %}><a href="/user">&#20010;&#20154;&#35774;&#32622;</a></li>
+                  <li class="divider"></li>
+                  <li><a href="/logout">&#36864;&#20986;&#30331;&#24405;</a></li>
+                </ul>
+              </li>
+          </ul>
+          {% else %}
+          <form class="navbar-form navbar-right" role="form" action="account" method="POST" data-placement="left" data-content="">
+            <div class="form-group">
+              <input type="text" placeholder="&#36134;&#21495;" class="form-control" id="account" name="account">
+            </div>
+            <div class="form-group">
+              <input type="password" placeholder="&#23494;&#30721;" class="form-control" id="passwd" name="passwd">
+            </div>
+            <button type="button" class="btn btn-success" id="submit">&#30331;&#24405;</button>
+            <a href="/regist" class="btn">&#27880;&#20876;</a>
+          </form>
+          <script src="/static/js/md5.js"></script>
+          {% endif %}
+          {% endblock navbar_right %}
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+    <div class="container {% if session['css'] == '1' %}col-lg-12 col-md-12 col-sm-12 col-xs-12{% endif %}">
+      <!-- Main component for a primary marketing message or call to action -->
+      <div class="row row-offcanvas">
+      {% block contain %}
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+      {% block main %}
+        {% if session['id']%}
+        <link href="/static/css/message.css" rel="stylesheet">
+        <script src="/static/js/message.js"></script>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id>
+          <section class="messages">
+          </section>
+        </div>
+        {% endif %}
+      {% endblock main %}
+      </div><!-- main block column is col-lg-9 -->
+      {% endblock contain %}
+      </div><!--end row -->
+      <hr>
+      <footer style="text-align:center;">
+        <p>&nbsp;&copy; <span style="font-size:18px;font-family:Forte;">law's courses</span> <strong style="font-size:15px;">2014</strong></p>
+      </footer>
+    </div> <!-- end container -->
+  </body>
+</html>

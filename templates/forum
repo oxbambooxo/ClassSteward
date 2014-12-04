@@ -1,0 +1,187 @@
+{% extends "index" %}
+{% block title %}Class Steward &#35770;&#22363;{% endblock %}
+{% block navbar_left %}
+    <li><a href="/syllabus"><span class="glyphicon glyphicon-th-list"></span> &#35838;&#31243;&#31616;&#20171;</a></li>
+    <li><a href="/schedule"><span class="glyphicon glyphicon-list-alt"></span> &#35838;&#31243;&#36827;&#24230;</a></li>
+    {% if 'id' in session.keys() and session['id'] < 500%}
+    <li><a href="/upload"><span class="glyphicon glyphicon-tasks"></span> &#20316;&#19994;&#31649;&#29702;</a></li>
+    {% else %}
+    <li><a href="/upload"><span class="glyphicon glyphicon-open"></span> &#19978;&#20256;&#20316;&#19994;</a></li>
+    {% endif %}
+    <li><a href="/download"><span class="glyphicon glyphicon-save"></span> &#35838;&#31243;&#36164;&#28304;</a></li>
+    <li class="active"><a href="/forum"><span class="glyphicon glyphicon-th-large"></span> &#35770;&#22363;</a></li>
+{% endblock %}
+{% block contain %}
+<link href="/static/css/forum.css" rel="stylesheet">
+{% block breadcrumb %}
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+  <ul class="nav nav-pills nav-justified">
+  {% set forum_length = forum['id']|length %}
+  {% for i in range(forum_length) %}
+    {% if forum['id'][i] == subject %}<li class="active"><i id="subject" style="display:none">{{subject}}</i>
+    {% else %}<li>
+    {% endif %}
+    <a href="/forum/{{forum['name'][i]}}"><strong style="font-size:18px;">{{forum['nickname'][i]}}</strong></a></li>
+  {% endfor %}
+  </ul>
+</div>
+{% endblock %}
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+{% block subject %}
+<div class="table-responsive">
+<table class="table table-hover table-bordered">
+  <tr><td class="text-center">&#26631;&#39064;</td><td class="text-center">&#22238;&#22797;/&#26597;&#30475;</td><td class="text-center">&#20316;&#32773;</td><td class="text-center">&#26368;&#21518;&#22238;&#22797;</td></tr>
+  {% set topic_length = topic['id']|length %}
+  {% for i in range(topic_length) %}
+    <tr>
+        <td width="54%">{%if topic['type'][i]==1%}[&#32622;&#39030;] {%endif%}<a href="/forum/{{subject}}/{{topic['id'][i]}}">{{topic['title'][i]}}</a></td>
+        <td width="7%" class="text-center">{{topic['total'][i]}} / {{topic['view'][i]}}</td>
+        <td width="18%"><a>{{topic['author'][i]}}</a>&nbsp;&nbsp;{{topic['time'][i]}}</td>
+        <td width="23%">{{topic['last_author'][i]}}&nbsp;&nbsp;{{topic['last_time'][i]}}
+        {% if 'id' in session.keys() and (session['id'] < 500 or session['id'] == topic['author-id'][i])%}
+          <button type="button" class="close delete_topic_confirm"><span aria-hidden="true">&times;</span></button>
+          <div style="position:relative;display:none;">
+            <div class="alert alert-danger" role="alert" style="position:absolute;right:0px;top:0px;z-index:99;">&#30830;&#23450;&#21024;&#38500;&#35813;&#24086;&#65311;<button type="button" class="btn btn-danger btn-xs delete_topic" topic="{{topic['id'][i]}}">&#30830;&#23450;</button></div>
+          </div>
+          {%if session['id'] < 500%}
+            {%if topic['type'][i]==1%}
+              <span class="glyphicon glyphicon-star unstar_topic" style="margin-right:5px;"></span>
+            {%else%}
+              <span class="glyphicon glyphicon-star-empty star_topic" style="margin-right:5px;"></span>
+            {%endif%}
+          {%endif%}
+        {% endif %}
+        </td>
+    </tr>
+  {% endfor %}
+</table>
+</div>
+<ul class="pagination col-lg-12 col-md-12 col-sm-12 col-xs-12">
+  {% set maxdivide = 27 %}{# &#39029;&#38754;&#26174;&#31034;&#20998;&#39029;&#30340;&#26368;&#22823;&#20998;&#39029;&#20010;&#25968;,&#26368;&#22909;&#20026;&#22855;&#25968;,&#20004;&#36793;&#20026;&#30465;&#30053;&#21495;&#30340;&#24773;&#20917;&#26102;&#21487;&#20197;&#26377;maxdivide//2 #}
+  {% set maxpage = count//divide+1 if (count//divide)%divide != 0 else count//divide %}{# &#19968;&#20849;&#26377;&#22810;&#23569;&#39029;&#25968; #}
+  {% if maxpage > 0 %}
+  {% if page < divide %}<li><a>&laquo;</a></li>
+  {% else %}<li><a href="/forum/{{subject}}?p={{page-divide}}">&laquo;</a></li>
+  {% endif %}
+  {% for i in range(maxpage) %} 
+    {% if page/divide <= maxdivide %}
+      {% if i != page/divide and i<=divide %}<li><a href="/forum/{{subject}}?p={{i*divide}}">{{i}}</a></li>{% endif %}
+      {% if i == page/divide %}<li class="active"><a>{{i}}</a></li>{% endif %}
+      {% if i >= maxdivide and i-1 == maxdivide %}<li><a href="/forum/{{subject}}?p={{i*divide}}">..</a></li>{% endif %}
+      {% if i == maxpage and maxpage > maxdivide %}<li><a href="/forum/{{subject}}?p={{maxpage*divide}}">{{i}}</a></li>{% endif %}
+    {% endif %}
+    {% if page/divide > maxdivide and page/divide < maxpage-maxdivide and maxpage > maxdivide %}
+      {% if i == 0 %}<li><a href="/forum/{{subject}}?p={{i*divide}}">{{i}}</a></li>{% endif %}
+      {% if i-1 == maxdivide %}<li><a href="/forum/{{subject}}?p={{page-(maxdivide//2)*divide}}">..</a></li>{% endif %}
+      {% if i != page/divide and i > (page/divide)-(maxdivide//2) and i < (page/divide)+(maxdivide//2) %}<li><a href="/forum/{{subject}}?p={{i*divide}}">{{i}}</a></li>{% endif %}
+      {% if i == page/divide %}<li class="active"><a>{{i}}</a></li>{% endif %}
+      {% if i+1 == maxdivide %}<li><a href="/forum/{{page+(maxdivide//2)*divide}}">..</a></li>{% endif %}
+      {% if i == maxdivide %}<li><a href="/forum/{{subject}}?p={{maxpage*divide}}">{{i}}</a></li>{% endif %}
+    {% endif %}
+    {% if (page/divide >= maxpage-maxdivide or page/divide == maxdivide) and maxpage > maxdivide %}
+      {% if i==0 %}<li><a href="/forum/{{subject}}?p={{i*divide}}">{{i}}</a></li>{% endif %}
+      {% if i+1 == maxdivide %}<li><a href="/forum/{{subject}}?p={{i*divide}}">{{i}}</a></li>{% endif %}
+      {% if i != page/divide and i >= maxpage-maxdivide %}<li><a href="/forum/{{subject}}?p={{i*divide}}">{{i}}</a></li>{% endif %}
+      {% if i == page/divide %}<li class="active"><a>{{i}}</a></li>{% endif %}
+    {% endif %}
+  {% endfor %}
+  {% if page+divide < count %}<li><a href="/forum/{{subject}}?p={{page+divide}}">&raquo;</a></li>
+  {% else %}<li><a>&raquo;</a></li>
+  {% endif %}
+  {% endif %}
+</ul>
+{% endblock %}
+{% block topic %}
+{% endblock %}
+</div>
+<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+{% block pronounce %}
+{% if session['id'] %}
+    <link href="/static/css/font-awesome.min.css" rel="stylesheet">
+    <link href="/static/css/edit.css" rel="stylesheet">
+    <script src="/static/js/jquery.hotkeys.js"></script>
+    <script src="/static/js/google-code-prettify/prettify.js"></script>
+    <script src="/static/js/bootstrap-wysiwyg.js"></script>
+    {% block pronounce_js %}<script src="/static/js/forum.js"></script>{% endblock %}
+    {% block pronounce_input %}<input type="text" class="form-control" id="title" placeholder="&#32534;&#36753;&#24086;&#23376;&#26631;&#39064;" />{% endblock %}
+    <div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor" id="newest">
+      <div class="btn-group">
+      <a class="btn dropdown-toggle" data-toggle="dropdown" title="&#23383;&#20307;&#26679;&#24335;"><i class="icon-font"></i><b class="caret"></b></a>
+      <ul class="dropdown-menu">
+        <li><a data-edit="fontName SimSun" style="font-family:SimSun">&#23435;&#20307;</a></li>
+        <li><a data-edit="fontName SimHei" style="font-family:SimHei">&#40657;&#20307;</a></li>
+        <li><a data-edit="fontName Microsoft YaHei" style="font-family:Microsoft YaHei">&#24494;&#36719;&#38597;&#40657;</a></li>
+        <li><a data-edit="fontName FangSong" style="font-family:FangSong">&#20223;&#23435;</a></li>
+        <li><a data-edit="fontName KaiTi" style="font-family:KaiTi">&#26999;&#20307;</a></li>
+        <li><a data-edit="fontName Courier New" style="font-family:Courier New">Courier New</a></li>
+        <li><a data-edit="fontName Comic Sans MS" style="font-family:Comic Sans MS">Comic Sans MS</a></li>
+        <li><a data-edit="fontName Impact" style="font-family:Impact">Impact</a></li>
+        <li><a data-edit="fontName Lucida Sans" style="font-family:Lucida Sans">Lucida Sans</a></li>
+        <li><a data-edit="fontName Tahoma" style="font-family:Tahoma">Tahoma</a></li>
+      </ul>
+      </div>
+      <div class="btn-group">
+      <a class="btn dropdown-toggle" data-toggle="dropdown" title="&#23383;&#20307;&#22823;&#23567;"><i class="icon-text-height"></i><b class="caret"></b></a>
+        <ul class="dropdown-menu">
+        <li><a data-edit="fontSize 5"><font size="5">&#36739;&#22823;&#23383;&#20307;</font></a></li>
+        <li><a data-edit="fontSize 3"><font size="3">&#26222;&#36890;&#23383;&#20307;</font></a></li>
+        <li><a data-edit="fontSize 1"><font size="1">&#36739;&#23567;&#23383;&#20307;</font></a></li>
+        </ul>
+      </div>
+      <div class="btn-group">
+      <a class="btn dropdown-toggle" data-toggle="dropdown" title="&#23383;&#20307;&#39068;&#33394;"><i class="icon-magic"></i><b class="caret"></b></a>
+        <ul class="dropdown-menu">
+        <li><a data-edit="ForeColor #000000" style="color:rgb(0,0,0)">&#40657; #000000</a></li>
+        <li><a data-edit="ForeColor #FF0000" style="color:rgb(255,0,0)">&#32418; #FF0000</a></li>
+        <li><a data-edit="ForeColor #FF8000" style="color:rgb(255,128,0)">&#27225; #FF8000</a></li>
+        <li><a data-edit="ForeColor #FFFF00" style="color:rgb(255,255,0)">&#40644; #FFFF00</a></li>
+        <li><a data-edit="ForeColor #00FF00" style="color:rgb(0,255,0)">&#32511; #00FF00</a></li>
+        <li><a data-edit="ForeColor #0000FF" style="color:rgb(0,0,255)">&#34013; #0000FF</a></li>
+        <li><a data-edit="ForeColor #8000FF" style="color:rgb(128,0,255)">&#32043; #8000FF</a></li>
+        </ul>
+      </div>
+      <div class="btn-group">
+        <a class="btn" data-edit="bold" title="&#21152;&#31895; (Ctrl/Cmd+B)"><i class="icon-bold"></i></a>
+        <a class="btn" data-edit="italic" title="&#26012;&#20307; (Ctrl/Cmd+I)"><i class="icon-italic"></i></a>
+        <a class="btn" data-edit="strikethrough" title="&#21024;&#38500;&#32447;"><i class="icon-strikethrough"></i></a>
+        <a class="btn" data-edit="underline" title="&#19979;&#21010;&#32447; (Ctrl/Cmd+U)"><i class="icon-underline"></i></a>
+      </div>
+      <div class="btn-group">
+        <a class="btn" data-edit="insertunorderedlist" title="&#26080;&#24207;&#21015;&#34920;"><i class="icon-list-ul"></i></a>
+        <a class="btn" data-edit="insertorderedlist" title="&#32534;&#21495;&#21015;&#34920;"><i class="icon-list-ol"></i></a>
+        <a class="btn" data-edit="outdent" title="&#21521;&#24038;&#32553;&#36827; (Shift+Tab)"><i class="icon-indent-left"></i></a>
+        <a class="btn" data-edit="indent" title="&#21521;&#21491;&#32553;&#36827; (Tab)"><i class="icon-indent-right"></i></a>
+      </div>
+      <div class="btn-group">
+        <a class="btn" data-edit="justifyleft" title="&#24038;&#23545;&#40784; (Ctrl/Cmd+L)"><i class="icon-align-left"></i></a>
+        <a class="btn" data-edit="justifycenter" title="&#23621;&#20013;&#23545;&#40784; (Ctrl/Cmd+E)"><i class="icon-align-center"></i></a>
+        <a class="btn" data-edit="justifyright" title="&#21491;&#23545;&#40784; (Ctrl/Cmd+R)"><i class="icon-align-right"></i></a>
+        <a class="btn" data-edit="justifyfull" title="&#20004;&#31471;&#23545;&#40784; (Ctrl/Cmd+J)"><i class="icon-align-justify"></i></a>
+      </div>
+      <div class="btn-group">
+          <a class="btn dropdown-toggle" data-toggle="dropdown" title="&#36229;&#38142;&#25509;"><i class="icon-link"></i></a>
+            <div class="dropdown-menu input-append">
+                <input class="span2" placeholder="URL" type="text" data-edit="createLink"/>
+                <button class="btn" type="button">Add</button>
+            </div>
+          <a class="btn" data-edit="unlink" title="&#31227;&#38500;&#38142;&#25509;"><i class="icon-cut"></i></a>
+      </div>
+      <div class="btn-group">
+        <a class="btn" title="&#25554;&#20837;&#22270;&#29255;,&#25903;&#25345;&#25302;&#25341; (or just drag & drop)" id="pictureBtn"><i class="icon-picture"></i></a>
+        <input type="file" data-role="magic-overlay" data-target="#pictureBtn" data-edit="insertImage" />
+      </div>
+      <div class="btn-group">
+        <a class="btn" data-edit="undo" title="Undo (Ctrl/Cmd+Z)"><i class="icon-reply"></i></a>
+        <a class="btn" data-edit="redo" title="Redo (Ctrl/Cmd+Y)"><i class="icon-share-alt"></i></a>
+      </div>
+      <input type="text" data-edit="inserttext" id="voiceBtn" x-webkit-speech="">
+    </div>
+    <div id="editor" contenteditable="true"></div><div id="scrolleditor"></div>
+    <span class="col-lg-11 col-md-11 col-sm-11 col-xs-11"></span><!-- this span is make follow button to right side-->
+    {% block pronounce_button %}
+    <button type="button" class="btn btn-info col-lg-1 col-md-1 col-sm-1 col-xs-1" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-content="" data-loading-text="&#27491;&#22312;&#21457;&#34920;..." id="publish">&#21457;&#24086;&#23376;</button>
+    {% endblock %}
+{% endif %}
+{% endblock pronounce %}
+</div>
+{% endblock contain %}

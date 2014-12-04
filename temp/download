@@ -1,0 +1,43 @@
+{% extends "index" %}
+{% block navbar_left %}
+    <li><a href="/syllabus"><span class="glyphicon glyphicon-th-list"></span> 课程简介</a></li>
+    <li><a href="/schedule"><span class="glyphicon glyphicon-list-alt"></span> 课程进度</a></li>
+    {% if 'id' in session.keys() and session['id'] < 500%}
+    <li><a href="/upload"><span class="glyphicon glyphicon-tasks"></span> 作业管理</a></li>
+    {% else %}
+    <li><a href="/upload"><span class="glyphicon glyphicon-open"></span> 上传作业</a></li>
+    {% endif %}
+    <li class="active"><a href="/download"><span class="glyphicon glyphicon-save"></span> 课程资源</a></li>
+    <li><a href="/forum"><span class="glyphicon glyphicon-th-large"></span> 论坛</a></li>
+{% endblock %}
+{% block main %}
+<script src="/static/js/file.js"></script>
+{% if 'id' in session.keys() and session['id'] < 500 %}
+<div class="panel panel-default">
+    <div class="panel-heading" data-toggle="collapse" data-target="#teach_files" aria-expanded="true" aria-controls="teach_files"><h3 class="panel-title">老师共享文件 :</h3></div>
+{% endif %}
+    <div class="table-responsive collapse in" id="teach_files">
+    <table class="table table-hover table-bordered">
+      {% for i in teacher_file %}
+        <tr><td>
+        <span class="glyphicon glyphicon-file"></span>&nbsp;&nbsp;<a href="/static/file/teacher/{{i[0]}}">{{i[0]}}</a>
+        {% if 'id' in session.keys() and session['id'] < 500 %}
+        <button type="button" class="btn btn-xs btn-default delete_file" style="float:right;">删除</button>
+        {% endif %}
+        <span style="float:right;">{{i[1]}}&nbsp;</span>
+        </td></tr>
+      {% endfor %}
+      {% if 'id' in session.keys() and session['id'] < 500 %}
+        <tr><td>
+        <form action="/file" method="POST" enctype="multipart/form-data">
+            <input type="file" multiple="multiple" name="teacher_file" style="display:inline;" />
+            <input type="button" class="btn btn-default teacher_upload" value="上传" style="float:right;" />
+        </form>
+        </td></tr>
+      {% endif %}
+    </table>
+    </div>
+{% if 'id' in session.keys() and session['id'] < 500 %}
+</div>
+{% endif %}
+{% endblock %}

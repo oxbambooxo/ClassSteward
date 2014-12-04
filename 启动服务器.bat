@@ -1,0 +1,1 @@
+python twistd.py -n -o web --wsgi app.app -p 8085 --logfile=log.txt

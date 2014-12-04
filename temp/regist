@@ -1,0 +1,75 @@
+{% extends "index" %}
+{% block title %}
+  {% if status == 'success' %}
+    law's courses 注册成功
+  {% else %}
+    law's courses 欢迎注册
+  {% endif %}
+{% endblock %}
+{% block navbar_right %}{% endblock %}
+{% block main %}
+<div class="jumbotron">
+<script src="/static/js/regist.js"></script>
+  {% if status != 'success'%}
+    <form role="form" action="/regist" method="POST" enctype="multipart/form-data">
+      {%for i,quest in enumerate(regist['question'])%}
+      <div class="form-group has-feedback question {%if status=='failed'%}has-error{%endif%}">
+        <label for="answer_{{i}}">注册问题{%if regist['question']|length>1%}{{i+1}}{%endif%}:</label>
+        <span>{{quest}}</span>
+        <input type="hidden" name="question_{{i}}" value="{{quest}}">
+        <input type="text" class="form-control" id="answer_{{i}}" name="answer_{{i}}" placeholder="输入注册问题答案">
+        <span class="glyphicon form-control-feedback"></span>
+      </div>
+      {%endfor%}
+      <div class="form-group has-feedback">
+        <label for="user_account">账号</label>
+        <input type="text" class="form-control" id="user_account" name="user_account" placeholder="输入用户名">
+        <span class="glyphicon form-control-feedback"></span>
+        <span class="help-block" id="account_help"></span>
+      </div>
+      <div class="form-group has-feedback">
+        <label for="user_passwd">密码</label>
+        <input type="password" class="form-control" id="user_passwd" name="user_passwd" placeholder="输入密码">
+        <span class="glyphicon form-control-feedback"></span>
+        <span class="help-block" id="passwd_help"></span>
+      </div>
+      <div class="form-group has-feedback">
+        <label for="user_name">姓名</label>
+        <input type="text" class="form-control" id="user_name" name="user_name" placeholder="输入真实姓名">
+        <span class="glyphicon form-control-feedback"></span>
+        <span class="help-block" id="name_help"></span>
+      </div>
+      <div class="form-group has-feedback">
+        <label for="class_name">选择班级</label>
+        <select id="class_name" name="class_name" class="form-control">
+          {%for i in range(regist['userclass']|length)%}
+          <option value="{{regist['userclass'][i]}}">{{regist['userclass'][i]}}班</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group has-feedback">
+        <label for="user_num">学号</label>
+        <input type="text" class="form-control" id="user_num" name="user_num" placeholder="输入学号后两位">
+        <span class="glyphicon form-control-feedback"></span>
+        <span class="help-block" id="num_help"></span>
+      </div>
+      <div class="form-group" style="display:none;">
+        <label for="user_photo">上传头像</label>
+        <input type="file" id="user_photo" name="user_photo">
+        <span class="help-block" id="photo_help">支持文件大小小于500K的 png, gif, jpg, jpeg格式图片，推荐大小为200x200。</span>
+      </div>
+      <input type="hidden" id="default" name="default" value=0>
+      <button type="button" class="btn btn-default">注册</button>
+    </form>
+    <script src="/static/js/md5.js"></script>
+  {% else %}
+    <div class="alert alert-success" role="alert">
+    <p><span class="glyphicon glyphicon-ok-circle"></span>注册成功，正在跳转回首页 ……</p>
+    <div class="progress">
+      <div class="progress-bar progress-bar-striped progress-bar-success active"  role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+      </div>
+    </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock main %}

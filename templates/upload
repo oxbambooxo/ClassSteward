@@ -1,0 +1,215 @@
+{% extends "index" %}
+{% block navbar_left %}
+    <li><a href="/syllabus"><span class="glyphicon glyphicon-th-list"></span> &#35838;&#31243;&#31616;&#20171;</a></li>
+    <li><a href="/schedule"><span class="glyphicon glyphicon-list-alt"></span> &#35838;&#31243;&#36827;&#24230;</a></li>
+    {% if 'id' in session.keys() and session['id'] < 500%}
+    <li class="active"><a href="/upload"><span class="glyphicon glyphicon-tasks"></span> &#20316;&#19994;&#31649;&#29702;</a></li>
+    {% else %}
+    <li class="active"><a href="/upload"><span class="glyphicon glyphicon-open"></span> &#19978;&#20256;&#20316;&#19994;</a></li>
+    {% endif %}
+    <li><a href="/download"><span class="glyphicon glyphicon-save"></span> &#35838;&#31243;&#36164;&#28304;</a></li>
+    <li><a href="/forum"><span class="glyphicon glyphicon-th-large"></span> &#35770;&#22363;</a></li>
+{% endblock %}
+
+{% block navbar_right %}
+<script src="/static/js/account.js"></script>
+{% if 'id' in session.keys()%}
+{% if session['css'] == '1' %}<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"></div>
+{%else%}<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3"></div>{%endif%}
+<ul class="nav navbar-nav ">
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="{{session['id']}}" class="index_username">{{session['name']}}</span>
+        <span class="glyphicon glyphicon-user"></span>
+      {%if msg!=0%}<span class="badge new_msg"></span>{%endif%}
+      <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu" role="menu">
+      <li {% if session['css'] != '1' %}class="active"{% endif %}><a id="narrowscreen">&#31364;&#23631;&#29256;</a></li>
+      <li {% if session['css'] == '1' %}class="active"{% endif %}><a id="widescreen">&#23485;&#23631;&#29256;</a></li>
+      <li class="divider"></li>
+      <li {% if msg==0 %}class="active"{% endif %}>
+        <a href="/msg">&#28040;&#24687;&#20013;&#24515; {% if msg!=0 %}<span class="badge new_msg"></span>{% endif %}</a>
+      </li>
+      {%if session['id'] < 500%}<li {% if admin %}class="active"{% endif %}><a href="/admin">&#31649;&#29702;&#20013;&#24515;</a></li>{% endif %}
+      <li {% if use %}class="active"{% endif %}><a href="/user">&#20010;&#20154;&#35774;&#32622;</a></li>
+      <li class="divider"></li>
+      <li><a href="/logout">&#36864;&#20986;&#30331;&#24405;</a></li>
+    </ul>
+  </li>
+</ul>
+{% endif %}
+{% endblock %}
+
+{% block main %}
+{% if 'id' in session.keys()%}
+<script src="/static/js/file.js"></script>
+{% if session['id'] > 500 %}
+<div class="table-responsive collapse in" id="homework_files">
+<table class="table table-hover table-bordered">
+  <tr><th>&#24050;&#19978;&#20256;&#20316;&#19994;</th><th>&#25152;&#23646;&#35838;&#31243;</th><th>&#21608;&#27425;</th><th>&#26368;&#21518;&#25552;&#20132;&#26102;&#38388;</th></tr>
+  {% for i in range(homework['course']|length)%}
+  <tr class="{{homework['course_id'][i]}}_work" style="display:none;">
+    <td>
+      <span class="glyphicon glyphicon-tag"></span>&nbsp;&nbsp;<a href="/static/file/homework/{{homework['course'][i]}}/{{homework['week'][i]}}/{{homework['class'][i]}}/{{homework['filename'][i]}}">{{homework['filename'][i]}}</a>
+      <span style="float:right;">(&#25552;&#20132;&#27425;&#25968;:{{homework['total'][i]}}&#27425;{%if homework['score'][i]%},&#25152;&#24471;&#20998;&#25968;:<strong>{{homework['score'][i]}}</strong>&#20998;{%endif%})</span>
+    </td>
+    <td>{{homework['course'][i]}}</td>
+    <td>&#31532;{{homework['week'][i]}}&#21608;</td>
+    <td>{{homework['time'][i]}}</td>
+  </tr>
+  {% endfor %}
+  <tr>
+    <form action="/file" method="POST" enctype="multipart/form-data" id="homework_submit">
+    <td><input type="file" name="homework" />
+        <span class="help-block name_help week_help">&#25552;&#20132;&#25991;&#20214;&#65306;<strong></strong>(&#25991;&#20214;&#23558;&#34987;&#33258;&#21160;&#21629;&#21517;)</span>
+        <input type="hidden" name="homework_name" value="" />
+    </td>
+    <td><select class="form-control input-sm course_select" name="course"></select>
+        <span class="help-block">&#35831;&#36873;&#25321;&#30456;&#20851;&#35838;&#31243;&#19978;&#20256;&#26412;&#21608;&#20316;&#19994;</span>
+    </td>
+    <td><select class="form-control input-sm week_select" name="week"></select></td>
+    <td><button class="btn btn-default push_homework">&#25552;&#20132;</button></td>
+    </form>
+  </tr>
+</table>
+</div>
+{% endif %}
+{% if session['id'] < 500 %}
+<div class="panel panel-default">
+    <div class="panel-heading" data-toggle="collapse" data-target="#file_browse" aria-expanded="true" aria-controls="file_browse">
+      <h3 class="panel-title">&#27983;&#35272;&#20316;&#19994;&#25991;&#20214; :</h3>
+    </div>
+    <div class="table-responsive collapse in" id="file_browse">
+    <table class="table table-hover table-bordered">
+      <tr>
+        <td>
+          <table style="display:inline;">
+          <tr>
+            <td width="30%"><select class="form-control input-sm file_course_select"></select></td>
+            <td width="30%"><select class="form-control input-sm file_week_select"></select></td>
+            <td width="30%"><select class="form-control input-sm file_class_select"></select></td>
+          </tr>
+          </table>
+        </td>
+        <td colspan="3"><button class="btn btn-danger delete_directory" style="float:right;">&#21024;&#38500;&#30446;&#24405;</button></td>
+      </tr>
+      <tr>
+        <th class="sort_filename" style="cursor:pointer;">&#25991;&#20214;&#21517;</th>
+        <th class="sort_score" style="cursor:pointer;" width="5%">&#20998;&#25968;</th>
+        <th width="6%">&#20849;&#25552;&#20132;</th>
+        <th class="sort_time" style="cursor:pointer;">&#26368;&#21518;&#19978;&#20132;&#26102;&#38388;</th>
+      </tr>
+      <tr>
+        <td colspan="4">
+          <button class="btn btn-default file_download" style="float:right;">&#25171;&#21253;&#19979;&#36733;</button>
+          <span class="total_help text-primary" style="float:right;font-size:18px;"></span>
+        </td>
+      </tr>
+    </table>
+    </div>
+</div>
+
+<script src="/static/js/highcharts.js"></script>
+<script src="/static/js/exporting.js"></script>
+<script src="/static/js/draw.js"></script>
+<!--<script src="/static/js/sand-signika.js"></script>-->
+
+<div class="panel panel-default">
+    <div class="panel-heading" data-toggle="collapse" data-target="#score_count" aria-expanded="true" aria-controls="score_count">
+      <h3 class="panel-title">&#25104;&#32489;&#32479;&#35745; :</h3>
+    </div>
+    <div class="table-responsive collapse in" id="score_count">
+    <table class="table table-hover table-bordered">
+      <tr><div id="chart" style="margin-top:50px;"></div></tr>
+      <tr>
+        <td>
+        <table width="100%" border="1">
+          <tr>
+            <td width="50%">
+              <ul style="list-style-type:none;padding:10px 0px 0px 10px;">
+              {%for i in range(course|length)%}
+              <li class="radio-inline"><label><input type="radio" name="course" value="{{course[i]}}" />{{course[i]}}</label></li>
+              {%endfor%}
+              </ul>
+            </td>
+            <td width="50%">
+              {%for i in range(user_class|length)%}
+              <label style="margin-left:10px;"><input type="checkbox" name="class" value="{{user_class[i]}}"> {{user_class[i]}}</label>
+              {%endfor%}
+            </td>
+          </tr>
+        </table>
+        </td>
+        <td width="20%"><button class="btn btn-default draw_course" style="margin:5px 0px 0px 5px;">&#32472;&#21046;&#35838;&#31243;&#27599;&#21608;&#25104;&#32489;&#32479;&#35745;&#22270;</button></td>
+      </tr>
+      <tr>
+        <td>
+        <table width="100%" border="1">
+          <tr>
+            <td width="50%">
+              <ul style="list-style-type:none;padding:10px 0px 0px 10px;">
+              {%for i in range(user_class|length)%}
+              <li class="radio-inline"><label><input type="radio" name="class" value="{{user_class[i]}}" />{{user_class[i]}}</label></li>
+              {%endfor%}
+              </ul>
+            </td>
+            <td width="50%">
+              {%for i in range(course|length)%}
+              <label style="margin-left:10px;"><input type="checkbox" name="course" value="{{course[i]}}"> {{course[i]}}</label>
+              {%endfor%}
+            </td>
+          </tr>
+        </table>
+        </td>
+        <td width="20%"><button class="btn btn-default draw_class" style="margin:5px 0px 0px 5px;">&#32472;&#21046;&#29677;&#32423;&#20010;&#20154;&#25104;&#32489;&#32479;&#35745;&#22270;</button></td>
+      </tr>
+      <tr>
+        <td>
+        <table width="100%" border="1">
+          <tr>
+            <td width="50%">
+              <select width="30%" class="input-xs user_class" style="margin:10px 0px 10px 10px;">
+                {%for i in range(user_class|length)%}
+                  <option value="{{user_class[i]}}">{{user_class[i]}}</option>
+                {%endfor%}
+              </select>
+              <select width="30%" class="input-xs user_num"></select>
+              <select width="30%" class="input-xs user_name"></select>
+            </td>
+            <td width="50%">
+              {%for i in range(course|length)%}
+              <label style="margin-left:10px;"><input type="checkbox" name="course" value="{{course[i]}}"> {{course[i]}}</label>
+              {%endfor%}
+            </td>
+          </tr>
+        </table>
+        </td>
+        <td width="20%"><button class="btn btn-default draw_user" style="margin:5px 0px 0px 5px;">&#32472;&#21046;&#20010;&#20154;&#27599;&#21608;&#25104;&#32489;&#32479;&#35745;&#22270;</button></td>
+      </tr>
+    </table>
+    </div>
+</div>
+{% endif %}
+{% else %}
+<table width="100%" style="margin-top:10px;">
+<tr>
+<td width="30%"></td>
+<td width="40%">
+<form role="form" action="account" method="POST" data-placement="left" data-content="">
+  <div class="form-group">
+    <input type="text" placeholder="&#36134;&#21495;" class="form-control" id="account" name="account">
+  </div>
+  <div class="form-group">
+    <input type="password" placeholder="&#23494;&#30721;" class="form-control" id="passwd" name="passwd">
+  </div>
+  <button type="button" class="btn btn-success" id="submit">&#30331;&#24405;</button>
+  <a href="/regist" class="btn">&#27880;&#20876;</a><span class="help-block" style="float:right;">&#35831;&#30331;&#24405;&#21518;&#19978;&#20256;&#20316;&#19994;</span>
+</form>
+</td>
+<td width="30%"></td>
+</tr>
+</table>
+<script src="/static/js/md5.js"></script>
+{% endif %}
+
+{% endblock %}

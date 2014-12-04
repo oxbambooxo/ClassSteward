@@ -1,0 +1,214 @@
+{% extends "index" %}
+{% block navbar_left %}
+    <li><a href="/syllabus"><span class="glyphicon glyphicon-th-list"></span> 课程简介</a></li>
+    <li><a href="/schedule"><span class="glyphicon glyphicon-list-alt"></span> 课程进度</a></li>
+    {% if 'id' in session.keys() and session['id'] < 500%}
+    <li><a href="/upload"><span class="glyphicon glyphicon-tasks"></span> 作业管理</a></li>
+    {% else %}
+    <li><a href="/upload"><span class="glyphicon glyphicon-open"></span> 上传作业</a></li>
+    {% endif %}
+    <li><a href="/download"><span class="glyphicon glyphicon-save"></span> 课程资源</a></li>
+    <li><a href="/forum"><span class="glyphicon glyphicon-th-large"></span> 论坛</a></li>
+{% endblock %}
+{% block main %}
+
+<script src="/static/js/admin.js"></script>
+<script src="/static/js/md5.js"></script>
+
+<div class="panel panel-default">
+    <div class="panel-heading" data-toggle="collapse" data-target="#regist_seting" aria-expanded="true" aria-controls="regist_seting"><h3 class="panel-title">注册问题设置 :</h3></div>
+    <div class="table-responsive collapse in" id="regist_seting">
+    <table class="table table-hover table-bordered table-condensed">
+        <tr><th>问题</th><th>答案</th><th>操作</th></tr>
+        {% for i in range(regist['question']|length) %}
+        <tr>
+            <td>{{regist['question'][i]}}</td>
+            <td>{{regist['answer'][i]}}</td>
+            <td><button type="button" class="btn btn-default delete_question">删除</button></td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td><input type="text" class="form-control" name="question" value="" /></td>
+            <td><input type="text" class="form-control" name="answer" value="" /></td>
+            <td><input type="button" class="btn btn-default new_question" value="新增"></td>
+        </tr>
+    </table>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading" data-toggle="collapse" data-target="#class_seting" aria-expanded="true" aria-controls="class_seting"><h3 class="panel-title">注册班级设置 :</h3></div>
+    <div class="table-responsive collapse in" id="class_seting">
+    <table class="table table-hover table-bordered table-condensed">
+        <tr><th>班级</th><th>操作</th></tr>
+        {% for i in range(regist['class']|length) %}
+        <tr>
+            <td>{{regist['class'][i]}}</td>
+            <td><button type="button" class="btn btn-default delete_class">删除</button></td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td><input type="text" class="form-control" name="class" value="" /></td>
+            <td><input type="button" class="btn btn-default new_class" value="新增"></td>
+        </tr>
+    </table>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading" data-toggle="collapse" data-target="#forum_seting" aria-expanded="true" aria-controls="forum_seting"><h3 class="panel-title">论坛相关设置 :</h3></div>
+    <div class="table-responsive collapse in" id="forum_seting">
+    <table class="table table-hover table-bordered table-condensed">
+        <tr><th>论坛(用于url和数据库中)</th><th>名称(用于论坛界面显示中)</th><th>操作</th></tr>
+        {% for i in range(forum['name']|length) %}
+        <tr>
+            <td class="forum_check">{{forum['name'][i]}}</td>
+            <td class="forum_check">{{forum['nickname'][i]}}</td>
+            <td><button type="button" class="btn btn-default delete_forum">删除</button></td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <form action="/admin" method="POST" enctype="multipart/form-data" id="addition_new_forum">
+            <td><input type="text" class="form-control" name="name" value="" /></td>
+            <td><input type="text" class="form-control" name="nickname" value="" /></td>
+            <td>
+                <input type="hidden" name="new_forum" />
+                <input type="button" class="btn btn-default new_forum" value="新增">
+            </td>
+            </form>
+        </tr>
+    </table>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <strong class="modal-title" id="myModalLabel">输入新密码</strong>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="form-control" id="new_passwd" name="new_passwd" value="" required="required"/>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary btn-sm modify_passwd_submit">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading" data-toggle="collapse" data-target="#user_admin" aria-expanded="true" aria-controls="user_admin"><h3 class="panel-title">管理员 :</h3></div>
+    <div class="table-responsive collapse in" id="user_admin">
+    <table class="table table-hover table-bordered">
+        <tr><th>ID</th><th>账号</th><th>姓名</th><th>注册时间</th><th>最后登录时间</th></tr>
+        {% for i in range(userinfo['name']|length)%}
+        {% if userinfo['id'][i] < 500 %}
+        <tr>
+            <td class="id_check">{{userinfo['id'][i]}}</td>
+            <td>{{userinfo['account'][i]}}</td>
+            <td>{{userinfo['name'][i]}}</td>
+            <td>{{userinfo['regist_time'][i]}}</td>
+            <td>
+                {{userinfo['last_time'][i]}}
+                {% if userinfo['id'][i] != 1 %}
+                <button type="button" class="btn btn-default btn-xs cancel_admin" style="float:right;">取消</button>
+                {% endif %}
+            </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+        <tr>
+        <td colspan="4">
+            <div class="input-group">
+            <div class="input-group-addon glyphicon glyphicon-user"></div>
+            <input type="text" class="form-control" id="new_admin" name="new_admin" value="" required="required"/>
+            </div>
+        </td>
+        <td>
+            <input type="button" class="btn btn-default addition_admin" value="添加" style="display:inline;"/>
+            <span class="help-block" id="add_help" style="display:inline;">请输入用户名</span>
+        </td>
+        </tr>
+    </table>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading" data-toggle="collapse" data-target="#user_total" aria-expanded="true" aria-controls="user_total">
+        <h3 class="panel-title">用户统计 :</h3>
+    </div>
+    <div id="user_total">
+    <ul class="nav nav-tabs user_class" role="tablist">
+    {% for i in range(user_class|length)%}
+    <li {% if i==0 %} class="active" {% endif %} user_class="{{user_class[i]}}"><a href="#class_{{user_class[i]}}" role="tab" data-toggle="tab">{{user_class[i]}}班</a></li>
+    {% endfor %}
+    <button class="btn- btn-danger btn-sm delete_class_user" style="margin-top:5px;margin-right:5px;float:right">删除该班用户</button>
+    </ul>
+    <div class="tab-content">
+    {%for j in range(user_class|length)%}
+    <div class="table-responsive collapse tab-pane fade in {% if j==0 %} active {% endif %}" id="class_{{user_class[j]}}">
+    <table class="table table-hover table-bordered" style="margin-bottom:0px;">
+        <tr>
+            <th width="30%">账号</th>
+            <th width="10%" style="text-align:center;">密码</th>
+            <th width="10%">班级</th>
+            <th width="10%">学号</th>
+            <th width="20%">姓名</th>
+            <th width="20%">最后登录时间</th>
+        </tr>
+        {% for i in range(userinfo['name']|length)%}
+        {%if userinfo['class'][i] == user_class[j]%}
+        <tr>
+            <td user_id="{{userinfo['id'][i]}}">
+                <div style="position:relative;">
+                <span class="user_account">{{userinfo['account'][i]}}</span>
+                  <div class="alert alert-info alert_modify_class" role="alert" style="position:absolute;top:-30px;z-index:99;width:100%;display:none;">
+                      <input type="text" class="form-control"/>
+                      <button type="button" class="btn btn-info btn-xs modify_class" style="float:left;">确定</button>
+                      <span class="help-block" style="display:inline;">&nbsp;&nbsp;输入新班级(为四位数字)</span>
+                  </div>
+                  <div class="alert alert-info alert_modify_num" role="alert" style="position:absolute;top:-30px;z-index:99;width:100%;display:none;">
+                      <input type="text" class="form-control"/>
+                      <button type="button" class="btn btn-info btn-xs modify_num" style="float:left;">确定</button>
+                      <span class="help-block" style="display:inline;">&nbsp;&nbsp;输入新学号(例:01、02、11、12 等)</span>
+                  </div>
+                  <div class="alert alert-info alert_modify_name" role="alert" style="position:absolute;top:-30px;z-index:99;width:100%;display:none;">
+                      <input type="text" class="form-control"/>
+                      <button type="button" class="btn btn-info btn-xs modify_name" style="float:left;">确定</button>
+                      <span class="help-block" style="display:inline;">&nbsp;&nbsp;输入新名字(任意长度字符)</span>
+                  </div>
+                </div>
+            </td>
+            <td style="text-align:center;"><button type="button" class="btn btn-xs btn-default modify_passwd" data-toggle="modal" data-target="#myModal">修改</button></td>
+            <td>{{userinfo['class'][i]}}
+                <button type="button" class="btn btn-xs btn-default modify_class_confirm" style="float:right;">修改</button></td>
+            <td>{{userinfo['num'][i]}}
+                <button type="button" class="btn btn-xs btn-default modify_num_confirm" style="float:right;">修改</button></td>
+            <td>{{userinfo['name'][i]}}
+                <button type="button" class="btn btn-xs btn-default modify_name_confirm" style="float:right;">修改</button></td>
+            <td>
+                {% if userinfo['id'][i] > 500%}
+                <div style="position:relative;">
+                <div class="alert alert-danger alert_delete_user" role="alert" style="position:absolute;top:-5px;right:35px;z-index:99;width:70%;display:none;padding:5px 0px 5px 20px;">
+                  确定删除？
+                  <button type="button" class="btn btn-info btn-xs delete_user">确定</button>
+                </div>
+                </div>
+                <button type="button" class="btn btn-xs btn-default delete_user_confirm" style="float:right;">删除</button>
+                {% endif %}
+                {{userinfo['last_time'][i]}}
+            </td>
+        </tr>
+        {%endif%}
+        {% endfor %}
+    </table>
+    </div>
+    {%endfor%}
+    </div>
+    </div>
+</div>
+
+{% endblock %}

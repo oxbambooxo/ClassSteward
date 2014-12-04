@@ -1,0 +1,124 @@
+article, aside, figure, footer, header, hgroup, 
+menu, nav, section { display: block; }
+/*
+body {
+    width: 500px;
+    margin: 20px auto;
+    font: 16px/1.4 Arial, sans-serif;
+    background: #f3eee9;
+}
+
+p {
+    margin: 0 0 1em;
+}
+*/
+.message {
+    overflow: hidden;
+    padding: 0 0 1em;
+    border-bottom: 1px solid #ddd;
+    margin: 0 0 1em;
+    *zoom: 1;
+}
+
+.message-img {
+    float: left;
+    margin-right: 33px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.message-img img {
+    display: block;
+}
+
+.message-body {
+    padding-top: 5px;
+    overflow: hidden;
+}
+
+.message .text {
+    padding: 10px;
+    border: 1px solid #e5e5e5;
+    border-radius: 5px;
+    background: #fff;
+}
+
+.message .text p:last-child {
+    margin: 0;
+}
+
+.message .attribution {
+    margin: 0.5em 0 0;
+    font-size: 14px;
+    color: #666;
+}
+
+/* Decoration */
+
+.messages,
+.message {
+    position: relative;
+}
+
+.messages:before,
+.message:before,
+.message .text:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 65px;
+}
+
+.messages:before {
+    width: 3px;
+    top: -20px;
+    bottom: -20px;
+    background: rgba(0,0,0,0.1);
+}
+
+.message:before {
+    width: 9px;
+    height: 9px;
+    border: 3px solid #fff;
+    border-radius: 100px;
+    margin: 16px 0 0 -6px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.2), inset 0 1px 1px rgba(0,0,0,0.1);
+    background: #ccc;
+}
+
+.message:hover:before {
+    background: orange;
+}
+
+.message .text:before {
+    top: 18px;
+    left: 78px;
+    width: 9px;
+    height: 9px;
+    border-width: 0 0 1px 1px;
+    border-style: solid;
+    border-color: #e5e5e5;
+    background: #fff;
+    -webkit-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+}
+
+.message p span
+{
+    float: right;
+    margin-right:4px;
+}
+
+.message p i
+{
+    float:right;
+    margin-top:3px;
+    cursor:pointer;
+}
+
+.messages
+{
+    margin-top: 20px;
+}
