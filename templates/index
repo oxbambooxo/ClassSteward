@@ -74,7 +74,7 @@
                   {%if session['id'] < 500%}<li {% if admin %}class="active"{% endif %}><a href="/admin">&#31649;&#29702;&#20013;&#24515;</a></li>{% endif %}
                   <li {% if use %}class="active"{% endif %}><a href="/user">&#20010;&#20154;&#35774;&#32622;</a></li>
                   <li class="divider"></li>
-                  <li><a href="/logout">&#36864;&#20986;&#30331;&#24405;</a></li>
+                  <li><a href="/logout" id="logout">&#36864;&#20986;&#30331;&#24405;</a></li>
                 </ul>
               </li>
           </ul>

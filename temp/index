@@ -74,7 +74,7 @@
                   {%if session['id'] < 500%}<li {% if admin %}class="active"{% endif %}><a href="/admin">管理中心</a></li>{% endif %}
                   <li {% if use %}class="active"{% endif %}><a href="/user">个人设置</a></li>
                   <li class="divider"></li>
-                  <li><a href="/logout">退出登录</a></li>
+                  <li><a href="/logout" id="logout">退出登录</a></li>
                 </ul>
               </li>
           </ul>

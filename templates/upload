@@ -33,7 +33,7 @@
       {%if session['id'] < 500%}<li {% if admin %}class="active"{% endif %}><a href="/admin">&#31649;&#29702;&#20013;&#24515;</a></li>{% endif %}
       <li {% if use %}class="active"{% endif %}><a href="/user">&#20010;&#20154;&#35774;&#32622;</a></li>
       <li class="divider"></li>
-      <li><a href="/logout">&#36864;&#20986;&#30331;&#24405;</a></li>
+      <li><a href="/logout" id="logout">&#36864;&#20986;&#30331;&#24405;</a></li>
     </ul>
   </li>
 </ul>
@@ -43,7 +43,7 @@
 {% block main %}
 {% if 'id' in session.keys()%}
 <script src="/static/js/file.js"></script>
-{% if session['id'] > 500 %}
+{% if session['id'] >= 500 %}
 <div class="table-responsive collapse in" id="homework_files">
 <table class="table table-hover table-bordered">
   <tr><th>&#24050;&#19978;&#20256;&#20316;&#19994;</th><th>&#25152;&#23646;&#35838;&#31243;</th><th>&#21608;&#27425;</th><th>&#26368;&#21518;&#25552;&#20132;&#26102;&#38388;</th></tr>

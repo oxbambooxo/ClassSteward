@@ -143,9 +143,9 @@ def regist():
                 db.memc.delete(request.args.get('check').encode('utf-8'))
                 news(session['id'],1,"mail","欢迎注册 Class Steward!")
                 news(session['id'],1,"agree","欢迎来到 Class Steward!")
-                return render_template('regist', status='success')
+                return render_template('regist', status='success',enumerate=enumerate)
             else:
-                return render_template('regist')
+                return render_template('regist',enumerate=enumerate)
         if request.args.get('request', None):
             with connect() as cursor:
                 status = cursor.execute("select * from user where account=%s"%request.args.get('request'))
@@ -193,7 +193,7 @@ def regist():
             db.memc.set(seed, userinfo, 3600)
             return redirect(url_for('regist')+'?check='+seed)
         else:
-            return render_template('regist',regist=regist,status='failed')
+            return render_template('regist',regist=regist,status='failed',enumerate=enumerate)
 
 @app.route('/logout')
 def logout():
@@ -213,8 +213,7 @@ def account():
                 cursor.execute("update user set last_time=now() where id=%d" %(session['id'],))
                 cursor.execute("select count(*) from messages where user=%d and flag=0"%(session['id'],))
                 count=cursor.fetchone()[0]
-                if 'db' in session:
-                    datadict[session['db']].ping()
+                print count
                 data=["user is living",count]
                 return jsonfix.dumps(data)
         if 'screen' in request.form:
@@ -287,7 +286,7 @@ def message():
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
     if request.method == 'GET':
-        if 'id' not in session or session['id'] > 500:
+        if 'id' not in session or session['id'] >= 500:
             return redirect(url_for('syllabus'))
         if session['id'] < 500:
             regist   ={'question':[],'answer':[],'class':[]}
@@ -309,11 +308,11 @@ def admin():
                 for r in result:
                     forum['name'].append(r[0])
                     forum['nickname'].append(r[1])
-                cursor.execute("select class from user where id > 500 group by class")
+                cursor.execute("select class from user where id >= 500 group by class")
                 result=cursor.fetchall()
                 for r in result:
                     user_class.append(r[0])
-                cursor.execute("select id,account,class,name,regist_time,last_time,num from user where id>500 order by class,num")
+                cursor.execute("select id,account,class,name,regist_time,last_time,num from user where id>=500 order by class,num")
                 result=cursor.fetchall()
                 for r in result:
                     userinfo['id'].append(r[0])
@@ -329,7 +328,7 @@ def admin():
             with connect() as cursor:
                 cursor.execute("update user set passwd='%s' where account='%s'"%(request.form['new_passwd'],request.form['user_account']))
             return "modify passwd success"
-        if session['id'] > 500:
+        if session['id'] >= 500:
             return "Access denied"
         if "new_forum" in request.form:
             forum_name     = request.form['name']
@@ -716,7 +715,7 @@ def forum(subject=999999,topic=None):
                 cursor.execute("update topic set total=total-1 where id=(select topic from comment where id='%s')"%(request.form['comment']))
                 cursor.execute("delete from comment where id='%s'"%(request.form['comment']))
             return "delete comment success"
-        if session['id'] > 500:
+        if session['id'] >= 500:
             return "Access denied"
         if 'delete_reply' in request.form:
             with connect() as cursor:
@@ -907,7 +906,7 @@ def download():
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     if request.method == 'GET':
-        if 'id' in session and session['id'] > 500:
+        if 'id' in session and session['id'] >= 500:
             with connect() as cursor:
                 cursor.execute("select (select id from course where name=homework.course),course,week,(select class from user where id=%d),filename,time,total,score from homework where author=%d"%(session['id'],session['id']))
                 result=cursor.fetchall()
@@ -931,7 +930,7 @@ def upload():
                 result=cursor.fetchall()
                 for r in result:
                     course_name.append(r[0])
-                cursor.execute("select class from user where id>500 group by class")
+                cursor.execute("select class from user where id>=500 group by class")
                 result=cursor.fetchall()
                 for r in result:
                     user_class.append(r[0])
@@ -979,8 +978,8 @@ def file():
                 else:
                     cursor.execute("insert into homework(course,week,author,filename) value('%s','%s',%d,'%s')"%(course,week,session['id'],filename))
             return redirect(url_for('upload'))
-        if session['id'] > 500:
-            return "Access denied."
+        if session['id'] >= 500:
+            return "Student HomeWork Page"
         if "teacher_file" in request.files:
             for f in request.files.getlist("teacher_file"):
                 #request.files.getlist获取files数组的文件列表
@@ -1065,7 +1064,7 @@ def draw():
         if 'request' in request.form:
             user={'class':[],'num':[],'name':[],'id':[]}
             with connect() as cursor:
-                cursor.execute("select class,num,name,id from user where id>500 order by class,num")
+                cursor.execute("select class,num,name,id from user where id>=500 order by class,num")
                 result=cursor.fetchall()
                 for r in result:
                     user['class'].append(r[0])

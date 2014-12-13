@@ -33,7 +33,7 @@
       {%if session['id'] < 500%}<li {% if admin %}class="active"{% endif %}><a href="/admin">管理中心</a></li>{% endif %}
       <li {% if use %}class="active"{% endif %}><a href="/user">个人设置</a></li>
       <li class="divider"></li>
-      <li><a href="/logout">退出登录</a></li>
+      <li><a href="/logout" id="logout">退出登录</a></li>
     </ul>
   </li>
 </ul>
@@ -43,7 +43,7 @@
 {% block main %}
 {% if 'id' in session.keys()%}
 <script src="/static/js/file.js"></script>
-{% if session['id'] > 500 %}
+{% if session['id'] >= 500 %}
 <div class="table-responsive collapse in" id="homework_files">
 <table class="table table-hover table-bordered">
   <tr><th>已上传作业</th><th>所属课程</th><th>周次</th><th>最后提交时间</th></tr>
