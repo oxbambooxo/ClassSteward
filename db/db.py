@@ -34,7 +34,8 @@ with open(cwd + "mysql.sql") as f:
             with msql as cursor:
                 try:
                     cursor.execute(s)
-                except:
+                except Exception,e:
+                    #print e
                     pass
             s=""
 del msql

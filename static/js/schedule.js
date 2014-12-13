@@ -97,6 +97,13 @@ $(document).ready(function()
     
     $(document).on("click",".delete_course",function()
     {
+        $(this).addClass('confirm_delete_course');
+        $(this).addClass('btn-danger');
+        $(this).val("确定");
+    });
+
+    $(document).on("click",".confirm_delete_course",function()
+    {
         var course_name=$(this).parent().prev().prev().text();
         var my_td=$(this).parent().parent();
         $.post("/schedule",{delete_course:"yes",course_name:course_name},function(data,status)
@@ -444,15 +451,12 @@ $(document).ready(function()
             tr.addClass("success");
             $.post("/syllabus",{new_syllabus:"yes",name:course_name,head:head.val(),detail:detail.val()},function(data)
             {
-                if(data=="new syllabus success")
-                {
-                    var s='<tr><td width="20%">'+head.val()+'</td><td width="80%">'+detail.val()+'<button type="button" class="btn btn-xs btn-default delete_syllabus" style="float:right;">删除</button></td></tr>';
-                    tr.before(s);
-                    tr.prev().show();
-                    $("#editor").html("");
-                    head.val("");
-                    detail.val("");
-                }
+                var s='<tr syllabus="'+data+'"><td width="20%">'+head.val()+'</td><td width="80%">'+detail.val()+'<button type="button" class="btn btn-xs btn-default delete_syllabus" style="float:right;">删除</button></td></tr>';
+                tr.before(s);
+                tr.prev().show();
+                $("#editor").html("");
+                head.val("");
+                detail.val("");
             });
         }
         else
@@ -464,12 +468,18 @@ $(document).ready(function()
         }
     });
 
-    $(".delete_syllabus").click(function()
+    $(document).on("click",".delete_syllabus",function()
+    {
+        $(this).addClass('confirm_delete_syllabus');
+        $(this).addClass('btn-danger');
+        $(this).text("确定");
+    });
+
+    $(document).on("click",".confirm_delete_syllabus",function()
     {
         var tr=$(this).parent().parent();
-        var course_name=$(this).parent().parent().parent().parent().parent().attr("course");
-        var head=$(this).parent().parent().find("td:first");
-        $.post("/syllabus",{delete_syllabus:"yes",name:course_name,head:head.text()},function(data)
+        var syllabus_id=$(this).parent().parent().attr("syllabus");
+        $.post("/syllabus",{delete_syllabus:"yes",id:syllabus_id},function(data)
         {
             if(data=="delete syllabus success")
             {

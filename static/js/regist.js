@@ -149,7 +149,7 @@ $(document).ready(function()
         };
         if(name_stat=='true')
         {
-        	if($("#class_name").val == '')
+        	if($("#class_name").val() == '' || $("#class_name").val() == null)
         	{
         		$("#class_name").focus();
                 $("#class_name").parent().removeClass("has-warning");

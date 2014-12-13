@@ -42,10 +42,11 @@ def radio_news(origin,type,content):
 
 datadict={}
 def connect():
-    if 'db' in session.keys():
-        if not session['db'] in datadict.keys():
+    if 'db' in session:
+        if session['db'] not in datadict:
             datadict[session['db']]=db.new()
         conn=datadict[session['db']]
+        conn.ping()
     else:
         conn=db.new()
     return conn
@@ -85,20 +86,22 @@ def syllabus(path='syllabus'):
                 syllabus['detail'].append(r[3])
         return render_template('syllabus',course=course,syllabus=syllabus)
     if request.method == 'POST' and session['id'] < 500:
-        if 'new_syllabus' in request.form.keys():
+        if 'new_syllabus' in request.form:
             with connect() as cursor:
                 cursor.execute("insert into syllabus(name,head,detail) value('%s','%s','%s')"%(request.form['name'],request.form['head'],request.form['detail']))
+                data = str(cursor.lastrowid)
             radio_news(1,"memo",'老师刚刚更新了课程简介，快去看看吧: <a href="/syllabus">课程简介</a>')
-            return "new syllabus success"
-        if 'delete_syllabus' in request.form.keys():
+            return data
+        if 'delete_syllabus' in request.form:
             with connect() as cursor:
-                cursor.execute("delete from syllabus where name='%s' and head='%s'"%(request.form['name'],request.form['head']))
+                print "delete from syllabus where id='%s'"%(request.form['id'],)
+                cursor.execute("delete from syllabus where id='%s'"%(request.form['id'],))
             return "delete syllabus success"
-        if 'modify_syllabus_head' in request.form.keys():
+        if 'modify_syllabus_head' in request.form:
             with connect() as cursor:
                 cursor.execute("update syllabus set head='%s' where id='%s'"%(request.form['head'],request.form['id']))
             return "modify syllabus sucess"
-        if 'modify_syllabus_detail' in request.form.keys():
+        if 'modify_syllabus_detail' in request.form:
             with connect() as cursor:
                 cursor.execute("update syllabus set detail='%s' where id='%s'"%(request.form['detail'],request.form['id']))
             return "modify syllabus sucess"
@@ -135,7 +138,7 @@ def regist():
                     userinfo['class'] = result[2]
                     userinfo['num']   = result[3]
                     userinfo['light'] = result[4]
-                for i in userinfo.keys():
+                for i in userinfo:
                     session[i]=userinfo[i]
                 db.memc.delete(request.args.get('check').encode('utf-8'))
                 news(session['id'],1,"mail","欢迎注册 Class Steward!")
@@ -169,7 +172,7 @@ def regist():
         i=0
         k=1
         while 1:
-            if 'question_'+str(i) in request.form.keys():
+            if 'question_'+str(i) in request.form:
                 j=regist['question'].index(request.form['question_'+str(i)])
                 if request.form['answer_'+str(i)] != regist['answer'][j]:
                     k=0
@@ -194,10 +197,10 @@ def regist():
 
 @app.route('/logout')
 def logout():
-    if 'id' in session.keys():
+    if 'id' in session:
         with connect() as cursor:
             cursor.execute("update user set last_time='%s' where id=%d"%(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time() - 120)), session['id']))
-            if 'db' in session.keys() and session['db'] in datadict.keys():
+            if 'db' in session and session['db'] in datadict:
                 del datadict[session['db']]
             session.clear()
             return redirect(url_for('syllabus'))
@@ -205,21 +208,21 @@ def logout():
 @app.route('/account', methods=['GET', 'POST'])
 def account():
     if request.method == 'POST':
-        if 'living' in request.form.keys() and 'id' in session.keys():
+        if 'living' in request.form and 'id' in session:
             with db.new() as cursor:
                 cursor.execute("update user set last_time=now() where id=%d" %(session['id'],))
                 cursor.execute("select count(*) from messages where user=%d and flag=0"%(session['id'],))
                 count=cursor.fetchone()[0]
-                if 'db' in session.keys():
+                if 'db' in session:
                     datadict[session['db']].ping()
                 data=["user is living",count]
                 return jsonfix.dumps(data)
-        if 'screen' in request.form.keys():
+        if 'screen' in request.form:
             with connect() as cursor:
                 cursor.execute("update user set css='%s' where id=%d"%(request.form['screen'],session['id']))
                 session['css']=request.form['screen']
                 return "change screen success"
-        if 'login' in request.form.keys():
+        if 'login' in request.form:
             with db.new() as cursor:
                 status = cursor.execute("select name,passwd,id,account,regist_time,last_time,photo,css,class,num,light from user where account='%s' and passwd='%s'"%(request.form['account'], request.form['passwd']))
                 if status != 0:
@@ -263,9 +266,9 @@ def msg():
 
 @app.route('/message', methods=['GET', 'POST'])
 def message():
-    if request.method == 'GET' and 'id' in session.keys():
+    if request.method == 'GET' and 'id' in session:
         with connect() as cursor:
-            if 'flag' in session.keys() and session['flag'] == 0:
+            if 'flag' in session and session['flag'] == 0:
                 cursor.execute("select (select name from user where id=messages.origin),type,content,time from messages where user='%s' order by id asc"%(session['id'],))
             else:
                 cursor.execute("select (select name from user where id=messages.origin),type,content,time from messages where user='%s' and flag=0 order by id asc"%(session['id'],))
@@ -284,7 +287,7 @@ def message():
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
     if request.method == 'GET':
-        if not 'id' in session.keys() or session['id'] > 500:
+        if 'id' not in session or session['id'] > 500:
             return redirect(url_for('syllabus'))
         if session['id'] < 500:
             regist   ={'question':[],'answer':[],'class':[]}
@@ -321,24 +324,24 @@ def admin():
                     userinfo['last_time'].append(r[5])
                     userinfo['num'].append(r[6])
             return render_template('admin',admin=1,regist=regist,forum=forum,userinfo=userinfo,user_class=user_class)
-    if request.method == 'POST' and 'id' in session.keys():
-        if "modify_passwd" in request.form.keys():
+    if request.method == 'POST' and 'id' in session:
+        if "modify_passwd" in request.form:
             with connect() as cursor:
                 cursor.execute("update user set passwd='%s' where account='%s'"%(request.form['new_passwd'],request.form['user_account']))
             return "modify passwd success"
         if session['id'] > 500:
             return "Access denied"
-        if "new_forum" in request.form.keys():
+        if "new_forum" in request.form:
             forum_name     = request.form['name']
             forum_nickname = request.form['nickname']
             with connect() as cursor:
                 cursor.execute("insert into forum(name,nickname) value('%s','%s')"%(forum_name,forum_nickname))
             return redirect(url_for('admin'))
-        if "delete_forum" in request.form.keys():
+        if "delete_forum" in request.form:
             with connect() as cursor:
                 cursor.execute("delete from forum where name='%s'"%request.form['delete_forum'])
             return "delete forum success"
-        if "modify_class" in request.form.keys():
+        if "modify_class" in request.form:
             user_id=request.form['user_id']
             new_class=request.form['new_class'].split()[0]
             old_class=request.form['old_class'].split()[0]
@@ -357,7 +360,7 @@ def admin():
                     cursor.execute("update homework set filename='%s' where course='%s' and week='%s' and author='%s'"%(new_filename,course,week,user_id))
                 cursor.execute("update user set class='%s' where id='%s'"%(new_class,user_id))
             return "modify class success"
-        if "modify_num" in request.form.keys():
+        if "modify_num" in request.form:
             user_id=request.form['user_id']
             new_num=request.form['new_num'].split()[0]
             user_class=request.form['user_class'].split()[0]
@@ -375,7 +378,7 @@ def admin():
                     cursor.execute("update homework set filename='%s' where course='%s' and week='%s' and author='%s'"%(new_filename,course,week,user_id))
                 cursor.execute("update user set num='%s' where id='%s'"%(new_num,user_id))
             return "modify num success"
-        if "modify_name" in request.form.keys():
+        if "modify_name" in request.form:
             user_id=request.form['user_id']
             new_name=request.form['new_name'].split()[0]
             user_class=request.form['user_class'].split()[0]
@@ -393,7 +396,7 @@ def admin():
                     cursor.execute("update homework set filename='%s' where course='%s' and week='%s' and author='%s'"%(new_filename,course,week,user_id))
                 cursor.execute("update user set name='%s' where id='%s'"%(new_name,user_id))
             return "modify name success"
-        if "delete_user" in request.form.keys():
+        if "delete_user" in request.form:
             with connect() as cursor:
                 cursor.execute("select course,week,(select class from user where id=homework.author),filename from homework where author=(select id from user where account='%s')"%request.form['user_account'])
                 result=cursor.fetchall()
@@ -402,7 +405,7 @@ def admin():
                     delete(path)
                 cursor.execute("delete from user where account='%s'"%request.form['user_account'])
             return "delete user success"
-        if "new_admin" in request.form.keys():
+        if "new_admin" in request.form:
             with connect() as cursor:
                 cursor.execute("select count(*) from user where id < 500")
                 count=cursor.fetchone()[0]
@@ -413,7 +416,7 @@ def admin():
                 userinfo=cursor.fetchone()
             news(user,1,"attent",'您已被赋为管理员权限: <a href="/schedule">课程管理界面</a>')
             return jsonfix.dumps(userinfo)
-        if "cancel_admin" in request.form.keys():
+        if "cancel_admin" in request.form:
             with connect() as cursor:
                 cursor.execute("select max(id) from user")
                 user_id=cursor.fetchone()[0]
@@ -421,30 +424,30 @@ def admin():
                 sql="update user set id=%d where account='%s'"%(user_id,request.form["cancel_account"])
                 cursor.execute(sql)
             return redirect(url_for('admin')+'#user_admin')
-        if "new_question" in request.form.keys():
+        if "new_question" in request.form:
             with connect() as cursor:
                 cursor.execute("insert into regist(question,answer) value('%s','%s')"%(request.form["question"],request.form["answer"]))
             return "new question success"
-        if "delete_question" in request.form.keys():
+        if "delete_question" in request.form:
             with connect() as cursor:
                 cursor.execute("delete from regist where question='%s'"%request.form["question"])
             return "delete question success"
-        if "new_class" in request.form.keys():
+        if "new_class" in request.form:
             with connect() as cursor:
                 cursor.execute("insert into class(name) value('%s')"%(request.form["class"]))
             return "new class success"
-        if "delete_class" in request.form.keys():
+        if "delete_class" in request.form:
             with connect() as cursor:
                 cursor.execute("delete from class where name='%s'"%request.form["class"])
             return "delete class success"
-        if "delete_class_user" in request.form.keys():
+        if "delete_class_user" in request.form:
             with connect() as cursor:
                 cursor.execute("delete from user where class='%s'"%request.form["class"])
             return "delete class user success"
 
 @app.route('/user', methods=['GET', 'POST'])
 def user():
-    if not 'id' in session.keys():
+    if 'id'not in session:
         return redirect(url_for('syllabus'))
     if request.method == 'GET':
         page = 0
@@ -482,17 +485,17 @@ def user():
             cursor.execute("select count(*) from comment where author = '%s'"%(session['id'],))
             count = cursor.fetchone()[0]
         return render_template('user',userinfo=userinfo,comment=comment,page=page,divide=divide,count=count,use=1)
-    if request.method == 'POST' and 'id' in session.keys():
-        if 'light' in request.form.keys():
+    if request.method == 'POST' and 'id' in session:
+        if 'light' in request.form:
             with connect() as cursor:
                 cursor.execute("update user set light='%s' where id=%d"%(request.form['light'],session['id']))
             session['light']=request.form['light']
             return redirect(url_for('user'))
-        if 'modify_photo' in request.form.keys():
+        if 'modify_photo' in request.form:
             with connect() as cursor:
                 cursor.execute("update user set photo='%s' where id=%d"%(request.form['photo'],session['id']))
             return "modify photo success"
-        if 'upload_photo' in request.form.keys():
+        if 'upload_photo' in request.form:
             f = request.files['photo']
             seed = str(random.randint(1000000000,2147483647))
             from PIL import Image
@@ -503,7 +506,7 @@ def user():
             with connect() as cursor:
                 cursor.execute("update user set photo='%s' where id=%d"%(seed,session['id']))
             return redirect(url_for('user'))
-        if 'delete_user_comment' in request.form.keys():
+        if 'delete_user_comment' in request.form:
             with connect() as cursor:
                 cursor.execute("select topic,(select count(*) from comment where topic = c.topic) from comment c where id='%s'"%request.form['comment'])
                 result = cursor.fetchone()
@@ -531,7 +534,7 @@ def forum(subject=999999,topic=None):
                 return redirect(url_for('syllabus'))
             try:
                 subject=int(subject)
-                if not subject in count:
+                if subject not in count:
                     while True :
                         #进入论坛页面时随机切换subject
                         subject=count[random.randint(0,len(count)-1)]
@@ -635,8 +638,8 @@ def forum(subject=999999,topic=None):
                     topic['last_author'].append(author)
                     topic['author-id'].append(r[9])
                 return render_template('forum',forum=forum,subject=subject,topic=topic,page=page,divide=divide,count=count)
-    if request.method == 'POST' and 'id' in session.keys():
-        if 'new_topic' in request.form.keys():
+    if request.method == 'POST' and 'id' in session:
+        if 'new_topic' in request.form:
             title=request.form['title']
             text=request.form['text'].replace("'","&apos;")
             subject=request.form['subject']
@@ -649,7 +652,7 @@ def forum(subject=999999,topic=None):
                 count=cursor.fetchone()[0]
                 #获得最新的个数使得页面跳转后看到最新发布的帖子,下同.
             return "%d"%count
-        if 'new_comment' in request.form.keys():
+        if 'new_comment' in request.form:
             text=request.form['text'].replace("'","&apos;")
             topic=request.form['topic']
             with connect() as cursor:
@@ -678,12 +681,12 @@ def forum(subject=999999,topic=None):
                 news(user,session['id'],"reply",jsonfix.dumps(content))
                 #因为news函数里面也用到了connect() as cursor,故在上面的with出来之后再调用较好.
             return "%d"%count
-        if 'modify_comment' in request.form.keys():
+        if 'modify_comment' in request.form:
             text = request.form['text'].replace("'","&apos;")
             with connect() as cursor:
                 cursor.execute("update comment set content='%s',last_time='%s' where id='%s'"%(text,now(),request.form['id']))
             return "modify comment success"
-        if 'new_reply' in request.form.keys():
+        if 'new_reply' in request.form:
             with connect() as cursor:
                 text = request.form['content'].replace("'","&apos;")
                 cursor.execute("insert into reply(comment,author,content) value('%s','%s','%s')"%(request.form['comment'],session['id'],text))
@@ -704,26 +707,26 @@ def forum(subject=999999,topic=None):
             if user != session['id']:
                 news(user,session['id'],"reply",jsonfix.dumps(content))
             return "reply comment success"
-        if 'delete_topic' in request.form.keys():
+        if 'delete_topic' in request.form:
             with connect() as cursor:
                 cursor.execute("delete from topic where id='%s'"%(request.form['topic']))
             return "delete topic success"
-        if 'delete_comment' in request.form.keys():
+        if 'delete_comment' in request.form:
             with connect() as cursor:
                 cursor.execute("update topic set total=total-1 where id=(select topic from comment where id='%s')"%(request.form['comment']))
                 cursor.execute("delete from comment where id='%s'"%(request.form['comment']))
             return "delete comment success"
         if session['id'] > 500:
             return "Access denied"
-        if 'delete_reply' in request.form.keys():
+        if 'delete_reply' in request.form:
             with connect() as cursor:
                 cursor.execute("delete from reply where id='%s'"%(request.form['reply']))
             return "delete reply success"
-        if "unstar_topic" in request.form.keys():
+        if "unstar_topic" in request.form:
             with connect() as cursor:
                 cursor.execute("update topic set type=100 where id='%s'"%(request.form['topic']))
             return "unstart topic success"
-        if "star_topic" in request.form.keys():
+        if "star_topic" in request.form:
             with connect() as cursor:
                 cursor.execute("update topic set type=1 where id='%s'"%(request.form['topic']))
             return "start topic success"
@@ -787,17 +790,17 @@ def schedule(path=None):
                 if r[2].date() <= this_week.date() and this_week.date() <= r[3].date()+datetime.timedelta(2):
                     schedule['this_week'].append((r[0],r[1]))
             return render_template('schedule',course=course,schedule=schedule)
-    if request.method == 'POST' and session['id'] < 500:
-        if "new_course" in request.form.keys():
+    if request.method == 'POST' and 'id' in session and session['id'] < 500:
+        if "new_course" in request.form:
             with connect() as cursor:
                 sql="insert into course(name,class,teacher) value('%s','%s','%s')"%(request.form['course_name'],request.form['course_class'],request.form['course_teacher'])
                 cursor.execute(sql)
             return "new course success"
-        if "delete_course" in request.form.keys():
+        if "delete_course" in request.form:
             with connect() as cursor:
                 cursor.execute("delete from course where name='%s'"%(request.form['course_name']))
             return "delete course success"
-        if "new_schedule" in request.form.keys():
+        if "new_schedule" in request.form:
             coursework=''
             for f in request.files.getlist("schedule_work"):
                 coursework+='|'+f.filename
@@ -810,7 +813,7 @@ def schedule(path=None):
                 cursor.execute("insert into schedule(course,week,date_start,date_end,event,homework,homework_start,homework_end,coursework,courseware) value('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')"%(request.form['course_name'],request.form['schedule_week'],request.form['date_start'],request.form['date_end'],request.form['event'],request.form['homework'],request.form['homework_start'],request.form['homework_end'],coursework,courseware))
             radio_news(1,"plan",'老师刚刚更新了课程进度，快去看看吧: <a href="/schedule">课程进度</a>')
             return redirect(url_for('schedule'))
-        if "delete_schedule" in request.form.keys():
+        if "delete_schedule" in request.form:
             with connect() as cursor:
                 cursor.execute("select coursework,courseware from schedule where course='%s' and week='%s'"%(request.form['course_name'],request.form['week']))
                 result=cursor.fetchone()
@@ -824,23 +827,23 @@ def schedule(path=None):
                             delete('./static/file/schedule/courseware/'+i)
                 cursor.execute("delete from schedule where course='%s' and week='%s'"%(request.form['course_name'],request.form['week']))
             return "delete schedule success"
-        if "modify_schedule_event" in request.form.keys():
+        if "modify_schedule_event" in request.form:
             with connect() as cursor:
                 cursor.execute("update schedule set event='%s' where course='%s' and week='%s'"%(request.form['event'],request.form['course'],request.form['week']))
             return "modify event success"
-        if "modify_schedule_date" in request.form.keys():
+        if "modify_schedule_date" in request.form:
             with connect() as cursor:
                 cursor.execute("update schedule set date_start='%s',date_end='%s' where course='%s' and week='%s'"%(request.form['date_start'],request.form['date_end'],request.form['course'],request.form['week']))
             return "modify date success"
-        if "modify_schedule_homework" in request.form.keys():
+        if "modify_schedule_homework" in request.form:
             with connect() as cursor:
                 cursor.execute("update schedule set homework='%s' where course='%s' and week='%s'"%(request.form['homework'],request.form['course'],request.form['week']))
             return "modify homework success"
-        if "modify_schedule_homework_date" in request.form.keys():
+        if "modify_schedule_homework_date" in request.form:
             with connect() as cursor:
                 cursor.execute("update schedule set homework_start='%s',homework_end='%s' where course='%s' and week='%s'"%(request.form['homework_start'],request.form['homework_end'],request.form['course'],request.form['week']))
             return "modify homework_date sucecss"
-        if "addidtion_courseware" in request.form.keys():
+        if "addidtion_courseware" in request.form:
             courseware=''
             for f in request.files.getlist("addition_ware"):
                 courseware+='|'+f.filename
@@ -851,7 +854,7 @@ def schedule(path=None):
                 new_courseware=result+courseware if result!='|' else courseware
                 cursor.execute("update schedule set courseware='%s' where course='%s' and week='%s'"%(new_courseware,request.form['course'],request.form['week']))
             return redirect(url_for('schedule'))
-        if "addidtion_coursework" in request.form.keys():
+        if "addidtion_coursework" in request.form:
             coursework=''
             for f in request.files.getlist("addition_work"):
                 coursework+='|'+f.filename
@@ -862,7 +865,7 @@ def schedule(path=None):
                 new_coursework=result+coursework if result!='|' else coursework
                 cursor.execute("update schedule set coursework='%s' where course='%s' and week='%s'"%(new_coursework,request.form['course'],request.form['week']))
             return redirect(url_for('schedule'))
-        if "delete_courseware" in request.form.keys():
+        if "delete_courseware" in request.form:
             courseware=request.form['courseware']
             with connect() as cursor:
                 cursor.execute("select courseware from schedule where course='%s' and week='%s'"%(request.form['course'],request.form['week']))
@@ -874,7 +877,7 @@ def schedule(path=None):
                     new_courseware+='|'+i
                 cursor.execute("update schedule set courseware='%s' where course='%s' and week='%s'"%(new_courseware,request.form['course'],request.form['week']))
             return "delete courseware success"
-        if "delete_coursework" in request.form.keys():
+        if "delete_coursework" in request.form:
             coursework=request.form['coursework']
             with connect() as cursor:
                 cursor.execute("select coursework from schedule where course='%s' and week='%s'"%(request.form['course'],request.form['week']))
@@ -886,7 +889,7 @@ def schedule(path=None):
                     new_coursework+='|'+i
                 cursor.execute("update schedule set coursework='%s' where course='%s' and week='%s'"%(new_coursework,request.form['course'],request.form['week']))
             return "delete coursework success"
-        if "delete_homework" in request.form.keys():
+        if "delete_homework" in request.form:
             with connect() as cursor:
                 cursor.execute("update schedule set homework='' where course='%s' and week='%s'"%(request.form['course'],request.form['week']))
             return "delete homework success"
@@ -904,7 +907,7 @@ def download():
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     if request.method == 'GET':
-        if 'id' in session.keys() and session['id'] > 500:
+        if 'id' in session and session['id'] > 500:
             with connect() as cursor:
                 cursor.execute("select (select id from course where name=homework.course),course,week,(select class from user where id=%d),filename,time,total,score from homework where author=%d"%(session['id'],session['id']))
                 result=cursor.fetchall()
@@ -919,7 +922,7 @@ def upload():
                     homework['total'].append(r[6])
                     homework['score'].append(r[7])
             return render_template('upload',homework=homework)
-        if 'id' in session.keys() and session['id'] < 500:
+        if 'id' in session and session['id'] < 500:
             course_name=[]
             user_class=[]
             user={'class':[],'num':[],'name':[]}
@@ -938,7 +941,7 @@ def upload():
 
 @app.route('/file', methods=['GET', 'POST'])
 def file():
-    if not 'id' in session.keys():
+    if 'id' not in session:
         return ""
     if request.method == 'GET':
         if request.args.get('schedule',None):
@@ -957,7 +960,7 @@ def file():
                     schedule['homework'].append(r[3].replace('AA',str(session['class'])).replace('BB',num).replace('CC',session['name']))
                 return jsonfix.dumps(schedule)
     if request.method == 'POST':
-        if "homework" in request.files.keys():
+        if "homework" in request.files:
             course=request.form['course']
             week=request.form['week']
             filename=request.form['homework_name']
@@ -978,18 +981,18 @@ def file():
             return redirect(url_for('upload'))
         if session['id'] > 500:
             return "Access denied."
-        if "teacher_file" in request.files.keys():
+        if "teacher_file" in request.files:
             for f in request.files.getlist("teacher_file"):
                 #request.files.getlist获取files数组的文件列表
                 f.save('./static/file/teacher/'+f.filename)
                 s=reduce(lambda x,y:str(x)+str(y),("&#"+str(ord(i))+";" for i in f.filename))
                 radio_news(1,"file","老师上传了新的共享文件: "+s)
             return redirect(url_for('download'))
-        if "delete_file" in request.form.keys():
+        if "delete_file" in request.form:
             filename=request.form['file_name']
             delete('./static/file/teacher/'+filename)
             return "delete file success"
-        if "delete_homework" in request.form.keys():
+        if "delete_homework" in request.form:
             course=request.form['course']
             week=request.form['week']
             user_class=request.form['class']
@@ -998,11 +1001,11 @@ def file():
             with connect() as cursor:
                 cursor.execute("delete from homework where filename='%s'"%filename)
             return "delete homework success"
-        if "score_homework" in request.form.keys():
+        if "score_homework" in request.form:
             with connect() as cursor:
                 cursor.execute("update homework set score='%s' where filename='%s'"%(request.form['score'],request.form['filename']))
             return "score homework success"
-        if "request" in request.form.keys():
+        if "request" in request.form:
             path=request.form['path']
             pathlist=path.split('/')
             file_total={"filename":[],"time":[],"flag":[],"num":[],"push_total":[],"score":[]}
@@ -1041,7 +1044,7 @@ def file():
             except Exception as e:
                 return ""
                 #在file.js第一次请求时会带有一个空的文件夹请求,except以避免raise WindowsError
-        if "download" in request.form.keys():
+        if "download" in request.form:
             import tarfile
             cwd=os.getcwd()
             path='./static/file/homework/'+request.form['course']+'/'+request.form['week']+'/'+request.form['class']+'/'
@@ -1051,15 +1054,15 @@ def file():
                 tar.add(path+i,arcname=i)
             tar.close()
             return "files is compress sucess"
-        if 'delete_directory' in request.form.keys():
+        if 'delete_directory' in request.form:
             import shutil
             shutil.rmtree('./static/file/homework/'+request.form['path'].encode('gbk'))
             return "delete directory success"
 
 @app.route('/draw', methods=['GET', 'POST'])
 def draw():
-    if request.method == 'POST' and 'id' in session.keys() and session['id'] < 500:
-        if 'request' in request.form.keys():
+    if request.method == 'POST' and 'id' in session and session['id'] < 500:
+        if 'request' in request.form:
             user={'class':[],'num':[],'name':[],'id':[]}
             with connect() as cursor:
                 cursor.execute("select class,num,name,id from user where id>500 order by class,num")
@@ -1070,7 +1073,7 @@ def draw():
                     user['name'].append(r[2])
                     user['id'].append(r[3])
             return jsonfix.dumps(user)
-        if 'draw_course' in request.form.keys():
+        if 'draw_course' in request.form:
             course=request.form['course']
             class_list=request.form['class'].split(',')
             class_sql=reduce(lambda x,y:x+' or '+y,map(lambda x:"class='"+str(x)+"'",class_list))
@@ -1092,7 +1095,7 @@ def draw():
                 t['class'].append(k)
                 draw_data.append(t)
             return jsonfix.dumps(draw_data)
-        if 'draw_class' in request.form.keys():
+        if 'draw_class' in request.form:
             user_class=request.form['class']
             course_list=request.form['course'].split(',')
             course_sql=reduce(lambda x,y:x+' or '+y,map(lambda x:"course='"+x+"'",course_list))
@@ -1116,7 +1119,7 @@ def draw():
                 t['course'].append(k)
                 draw_data.append(t)
             return jsonfix.dumps(draw_data)
-        if 'draw_user' in request.form.keys():
+        if 'draw_user' in request.form:
             user=request.form['user']
             course_list=request.form['course'].split(',')
             course_sql=reduce(lambda x,y:x+' or '+y,map(lambda x:"author="+user+" and course='"+x+"'",course_list))

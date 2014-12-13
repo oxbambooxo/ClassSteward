@@ -53,18 +53,18 @@ create table forum
 (
     id int auto_increment primary key,
     name varchar(30) unique,
-    nickname varchar(30) unique,
+    nickname varchar(30) unique
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 create table topic
 (
-    subject int not null,
     id int auto_increment primary key,
+    subject int not null,
     title tinytext not null,
     time timestamp default CURRENT_TIMESTAMP not null,
     last_time timestamp not null,
-    author int not null,
+    author int,
     last_author int not null,
     view int default 0 not null,
     total int default 0 not null,
@@ -79,7 +79,7 @@ create table comment
     topic int not null,
     id int auto_increment primary key,
     agree int default 0 not null,
-    author int not null,
+    author int,
     content longtext,
     time timestamp default CURRENT_TIMESTAMP not null,
     last_time timestamp,
@@ -92,7 +92,7 @@ create table reply
 (
     id int auto_increment primary key,
     comment int not null,
-    author int not null,
+    author int,
     content text,
     time timestamp default CURRENT_TIMESTAMP not null,
     constraint reply_comment_fk foreign key (comment) references comment(id) on delete cascade on update cascade,
