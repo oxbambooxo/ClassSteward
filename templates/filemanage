@@ -3,7 +3,7 @@
     <li><a href="/syllabus"><span class="glyphicon glyphicon-th-list"></span> 课程简介</a></li>
     <li><a href="/schedule"><span class="glyphicon glyphicon-list-alt"></span> 课程进度</a></li>
     {% if 'id' in session and session['id'] < 500%}
-    <li class="active"><a href="/upload"><span class="glyphicon glyphicon-tasks"></span> 作业管理</a></li>
+    <li class="active"><a href="/filemanage"><span class="glyphicon glyphicon-tasks"></span> 作业管理</a></li>
     {% else %}
     <li class="active"><a href="/upload"><span class="glyphicon glyphicon-open"></span> 上传作业</a></li>
     {% endif %}
@@ -43,37 +43,6 @@
 {% block main %}
 {% if 'id' in session%}
 <script src="/static/js/file.js"></script>
-{% if session['id'] >= 500 %}
-<div class="table-responsive collapse in" id="homework_files">
-<table class="table table-hover table-bordered">
-  <tr><th>已上传作业</th><th>所属课程</th><th>周次</th><th>最后提交时间</th></tr>
-  {% for i in range(homework['course']|length)%}
-  <tr class="{{homework['course_id'][i]}}_work" style="display:none;">
-    <td>
-      <span class="glyphicon glyphicon-tag"></span>&nbsp;&nbsp;<a href="/static/file/homework/{{homework['course'][i]}}/{{homework['week'][i]}}/{{homework['class'][i]}}/{{homework['filename'][i]}}">{{homework['filename'][i]}}</a>
-      <span style="float:right;">(提交次数:{{homework['total'][i]}}次{%if homework['score'][i]%},所得分数:<strong>{{homework['score'][i]}}</strong>分{%endif%})</span>
-    </td>
-    <td>{{homework['course'][i]}}</td>
-    <td>第{{homework['week'][i]}}周</td>
-    <td>{{homework['time'][i]}}</td>
-  </tr>
-  {% endfor %}
-  <tr>
-    <form action="/file" method="POST" enctype="multipart/form-data" id="homework_submit">
-    <td><input type="file" name="homework" />
-        <span class="help-block name_help week_help">提交文件：<strong></strong>(文件将被自动命名)</span>
-        <input type="hidden" name="homework_name" value="" />
-    </td>
-    <td><select class="form-control input-sm course_select" name="course"></select>
-        <span class="help-block">请选择相关课程上传本周作业</span>
-    </td>
-    <td><select class="form-control input-sm week_select" name="week"></select></td>
-    <td><button class="btn btn-default push_homework">提交</button></td>
-    </form>
-  </tr>
-</table>
-</div>
-{% endif %}
 {% if session['id'] < 500 %}
 <div class="panel panel-default">
     <div class="panel-heading" data-toggle="collapse" data-target="#file_browse" aria-expanded="true" aria-controls="file_browse">

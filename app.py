@@ -690,6 +690,7 @@ def forum(subject=999999,topic=None):
         if 'modify_comment' in request.form:
             text = request.form['text'].replace("'","&apos;")
             with connect() as cursor:
+                cursor.execute("update topic set last_time=now(),last_author=%d where id=(select topic from comment where id='%s')"%(session['id'],request.form['id']))
                 cursor.execute("update comment set content='%s',last_time='%s' where id='%s'"%(text,now(),request.form['id']))
             return "modify comment success"
         if 'new_reply' in request.form:
@@ -929,6 +930,14 @@ def upload():
                     homework['score'].append(r[7])
             return render_template('upload',homework=homework)
         if 'id' in session and session['id'] < 500:
+            return redirect(url_for('filemanage'))
+        else:
+            return render_template('upload')
+
+@app.route('/filemanage', methods=['GET', 'POST'])
+def filemanage():
+    if request.method == 'GET':
+        if 'id' in session and session['id'] < 500:
             course_name=[]
             user_class=[]
             user={'class':[],'num':[],'name':[]}
@@ -941,9 +950,9 @@ def upload():
                 result=cursor.fetchall()
                 for r in result:
                     user_class.append(r[0])
-            return render_template('upload',course=course_name,user_class=user_class)
+            return render_template('filemanage',course=course_name,user_class=user_class)
         else:
-            return render_template('upload')
+            return render_template('filemanage')
 
 @app.route('/file', methods=['GET', 'POST'])
 def file():
