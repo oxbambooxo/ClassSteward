@@ -1,14 +1,14 @@
 {% extends "index" %}
 {% block navbar_left %}
-    <li><a href="/syllabus"><span class="glyphicon glyphicon-th-list"></span> &#35838;&#31243;&#31616;&#20171;</a></li>
-    <li class="active"><a href="/schedule"><span class="glyphicon glyphicon-list-alt"></span> &#35838;&#31243;&#36827;&#24230;</a></li>
-    {% if 'id' in session.keys() and session['id'] < 500%}
-    <li><a href="/upload"><span class="glyphicon glyphicon-tasks"></span> &#20316;&#19994;&#31649;&#29702;</a></li>
+    <li><a href="/syllabus"><span class="glyphicon glyphicon-th-list"></span> 课程简介</a></li>
+    <li class="active"><a href="/schedule"><span class="glyphicon glyphicon-list-alt"></span> 课程进度</a></li>
+    {% if 'id' in session and session['id'] < 500%}
+    <li><a href="/upload"><span class="glyphicon glyphicon-tasks"></span> 作业管理</a></li>
     {% else %}
-    <li><a href="/upload"><span class="glyphicon glyphicon-open"></span> &#19978;&#20256;&#20316;&#19994;</a></li>
+    <li><a href="/upload"><span class="glyphicon glyphicon-open"></span> 上传作业</a></li>
     {% endif %}
-    <li><a href="/download"><span class="glyphicon glyphicon-save"></span> &#35838;&#31243;&#36164;&#28304;</a></li>
-    <li><a href="/forum"><span class="glyphicon glyphicon-th-large"></span> &#35770;&#22363;</a></li>
+    <li><a href="/download"><span class="glyphicon glyphicon-save"></span> 课程资源</a></li>
+    <li><a href="/forum"><span class="glyphicon glyphicon-th-large"></span> 论坛</a></li>
 {% endblock %}
 {% block main %}
 <script src="/static/js/schedule.js"></script>
@@ -22,31 +22,31 @@
   {% for i in range(course['name']|length)%}
     <div class="table-responsive tab-pane fade in {% if i==0 %} active {% endif %}" id="course_{{course['id'][i]}}" course="{{course['name'][i]}}">
       <table class="table table-hover table-bordered" style="margin-bottom:0px;">
-      <tr><th width="9%">&#21608;&#25968;</th><th width="19%">&#26102;&#38388;</th><th width="50%">&#20869;&#23481;</th><th>&#35838;&#20214;/&#20316;&#19994;</th></tr>
+      <tr><th width="9%">周数</th><th width="19%">时间</th><th width="50%">内容</th><th>课件/作业</th></tr>
       {% for j in range(schedule['course']|length)%}
       {% if schedule['course'][j] == course['name'][i] %}
       <tr {%for k in range(schedule['this_week']|length)%}{%if schedule['this_week'][k][0] == schedule['course'][j] and schedule['this_week'][k][1] == schedule['week'][j]%}class="info"{%endif%}{%endfor%}>
-        <td class="week_id" week="{{schedule['week'][j]}}">&#31532;{{schedule['week'][j]}}&#21608;
-        {% if 'id' in session.keys() and session['id'] < 500 %}
-          <button type="button" class="btn btn-xs btn-default delete_schedule" style="float:right;">&#21024;&#38500;</button>
+        <td class="week_id" week="{{schedule['week'][j]}}">第{{schedule['week'][j]}}周
+        {% if 'id' in session and session['id'] < 500 %}
+          <button type="button" class="btn btn-xs btn-default delete_schedule" style="float:right;">删除</button>
         {% endif %}
         </td>
         <td>
-          <span>{{schedule['date_start'][j]}} &#21040; {{schedule['date_end'][j]}}</span>
-          {% if 'id' in session.keys() and session['id'] < 500 %}
+          <span>{{schedule['date_start'][j]}} 到 {{schedule['date_end'][j]}}</span>
+          {% if 'id' in session and session['id'] < 500 %}
           <div style="display:none;">
             <input type="text" class="form-control input-sm select_date" value="{{schedule['date_start'][j]}}" style="padding:0px 0px 0px 5px;width:40%;display:inline;"/>
-            <span>&nbsp;&#8596;&nbsp;</span>
+            <span>&nbsp;↔&nbsp;</span>
             <input type="text" class="form-control input-sm select_date" value="{{schedule['date_end'][j]}}" style="padding:0px 0px 0px 5px;width:40%;display:inline;"/>
           </div>
-          <button class="btn btn-default btn-xs modify_schedule_date">&#20462;&#25913;</button>
-          <button class="btn btn-danger btn-xs cancel_schedule_date" style="display:none;">&#21462;&#28040;</button>
+          <button class="btn btn-default btn-xs modify_schedule_date">修改</button>
+          <button class="btn btn-danger btn-xs cancel_schedule_date" style="display:none;">取消</button>
           {% endif %}
         </td>
         <td>
           <div class="schedule_event">{{schedule['event'][j]}}</div>
-          {% if 'id' in session.keys() and session['id'] < 500 %}
-            <button type="button" class="btn btn-xs btn-default modify_schedule_event" style="float:left;">&#20462;&#25913;</button>
+          {% if 'id' in session and session['id'] < 500 %}
+            <button type="button" class="btn btn-xs btn-default modify_schedule_event" style="float:left;">修改</button>
           {% endif %}
         </td>
         <td style="padding:0px 0px 0px 0px;">
@@ -54,12 +54,12 @@
           <div style="margin:3px 0px 0px 3px;">
             <span class="glyphicon glyphicon-tags"></span>&nbsp;&nbsp;
             <a target="_blank" href="/static/file/schedule/courseware/{{schedule['courseware'][j][k]}}">{{schedule['courseware'][j][k]}}</a>
-            {% if 'id' in session.keys() and session['id'] < 500 %}
-              <button class="btn btn-danger btn-xs delete_courseware">&#21024;&#38500;</button>
+            {% if 'id' in session and session['id'] < 500 %}
+              <button class="btn btn-danger btn-xs delete_courseware">删除</button>
             {% endif %}
           </div>
           {% endfor %}
-          {% if 'id' in session.keys() and session['id'] < 500 %}
+          {% if 'id' in session and session['id'] < 500 %}
             <form action="" method="POST" enctype="multipart/form-data" style="display:none;margin:3px 0px 3px 0px;">
               <input type="hidden" name="course" value="{{schedule['course'][j]}}"/>
               <input type="hidden" name="week" value="{{schedule['week'][j]}}"/>
@@ -67,23 +67,23 @@
               <table>
               <tr>
               <td><input type="file" multiple="multiple" name="addition_ware"/></td>
-              <td><input class="btn btn-default btn-xs" type="submit" value="&#25552;&#20132;"/></td>
-              <td><input class="btn btn-danger btn-xs cancel_addition_file" type="button" value="&#21462;&#28040;" /></td>
+              <td><input class="btn btn-default btn-xs" type="submit" value="提交"/></td>
+              <td><input class="btn btn-danger btn-xs cancel_addition_file" type="button" value="取消" /></td>
               </tr>
               </table>
             </form>
-            <button class="btn btn-default btn-xs addition_file" style="display:block;">&#28155;&#21152;&#35838;&#20214;&#25991;&#20214;</button>
+            <button class="btn btn-default btn-xs addition_file" style="display:block;">添加课件文件</button>
           {% endif %}
           {% for k in range(schedule['coursework'][j]|length)%}
           <div style="margin:3px 0px 0px 3px;">
             <span class="glyphicon glyphicon-tag"></span>&nbsp;&nbsp;
             <a target="_blank" href="/static/file/schedule/coursework/{{schedule['coursework'][j][k]}}">{{schedule['coursework'][j][k]}}</a>
-            {% if 'id' in session.keys() and session['id'] < 500 %}
-              <button class="btn btn-danger btn-xs delete_coursework">&#21024;&#38500;</button>
+            {% if 'id' in session and session['id'] < 500 %}
+              <button class="btn btn-danger btn-xs delete_coursework">删除</button>
             {% endif %}
           </div>
           {% endfor %}
-          {% if 'id' in session.keys() and session['id'] < 500 %}
+          {% if 'id' in session and session['id'] < 500 %}
             <form action="" method="POST" enctype="multipart/form-data" style="display:none;margin:3px 0px 3px 0px;">
               <input type="hidden" name="course" value="{{schedule['course'][j]}}"/>
               <input type="hidden" name="week" value="{{schedule['week'][j]}}"/>
@@ -91,43 +91,43 @@
               <table>
               <tr>
               <td><input type="file" multiple="multiple" name="addition_work"/></td>
-              <td><input class="btn btn-default btn-xs" type="submit" value="&#25552;&#20132;"/></td>
-              <td><input class="btn btn-danger btn-xs cancel_addition_file" type="button" value="&#21462;&#28040;" /></td>
+              <td><input class="btn btn-default btn-xs" type="submit" value="提交"/></td>
+              <td><input class="btn btn-danger btn-xs cancel_addition_file" type="button" value="取消" /></td>
               </tr>
               </table>
             </form>
-            <button class="btn btn-default btn-xs addition_file" style="display:block;">&#28155;&#21152;&#20316;&#19994;&#25991;&#20214;</button>
+            <button class="btn btn-default btn-xs addition_file" style="display:block;">添加作业文件</button>
           {% endif %}
-          {% if 'id' in session.keys() and session['id'] < 500 and schedule['homework'][j]%}
+          {% if 'id' in session and session['id'] < 500 and schedule['homework'][j]%}
           <div style="margin:3px 0px 3px 3px;">
             <span class="glyphicon glyphicon-pencil"></span>&nbsp;{{schedule['homework'][j]}}
-            <button class="btn btn-danger btn-xs delete_homework" style="float:right;">&#21024;&#38500;</button>
+            <button class="btn btn-danger btn-xs delete_homework" style="float:right;">删除</button>
           </div>
           {% endif %}
-          {% if 'id' in session.keys() and session['id'] < 500 %}
+          {% if 'id' in session and session['id'] < 500 %}
             <input type="text" class="form-control" value="" style="display:none;" />
-            <button class="btn btn-default btn-xs modify_schedule_homework" style="margin-left:3px">&#20462;&#25913;&#20316;&#19994;&#21629;&#21517;&#35268;&#33539;</button>
-            <button class="btn btn-danger btn-xs cancel_schedule_homework" style="display:none;">&#21462;&#28040;</button>
+            <button class="btn btn-default btn-xs modify_schedule_homework" style="margin-left:3px">修改作业命名规范</button>
+            <button class="btn btn-danger btn-xs cancel_schedule_homework" style="display:none;">取消</button>
           {% endif %}
           {% if schedule['homework'][j] %}
           <div style="margin:3px 0px 3px 3px;" class="homework_date">
-            <span class="glyphicon glyphicon-pencil"></span>&nbsp;{{schedule['homework_start'][j]}} &#21040; {{schedule['homework_end'][j]}}
+            <span class="glyphicon glyphicon-pencil"></span>&nbsp;{{schedule['homework_start'][j]}} 到 {{schedule['homework_end'][j]}}
           </div>
           {% endif %}
-          {% if 'id' in session.keys() and session['id'] < 500 %}
+          {% if 'id' in session and session['id'] < 500 %}
           <div style="display:none;">
             <input type="text" class="form-control input-sm select_date" value="{{schedule['homework_start'][j]}}" style="padding:0px 0px 0px 5px;width:40%;display:inline;"/>
-            <span>&nbsp;&#8596;&nbsp;</span>
+            <span>&nbsp;↔&nbsp;</span>
             <input type="text" class="form-control input-sm select_date" value="{{schedule['homework_end'][j]}}" style="padding:0px 0px 0px 5px;width:40%;display:inline;"/>
           </div>
-          <button class="btn btn-default btn-xs modify_schedule_homework_date" style="margin:0px 0px 3px 6px">&#20462;&#25913;&#20316;&#19994;&#25130;&#27490;&#26085;&#26399;</button>
-          <button class="btn btn-danger btn-xs cancel_schedule_homework_date" style="display:none;">&#21462;&#28040;</button>
+          <button class="btn btn-default btn-xs modify_schedule_homework_date" style="margin:0px 0px 3px 6px">修改作业截止日期</button>
+          <button class="btn btn-danger btn-xs cancel_schedule_homework_date" style="display:none;">取消</button>
           {% endif %}
         </td>
         </tr>
       {% endif %}
       {% endfor %}
-      {% if 'id' in session.keys() and session['id'] < 500 %}
+      {% if 'id' in session and session['id'] < 500 %}
       <tr>
       <form action="/schedule" method="POST" enctype="multipart/form-data" class="new_schedule_submit">
         <td>
@@ -137,18 +137,18 @@
         </td>
         <td>
           <input type="text" class="form-control input-sm select_date" value="" name="date_start" style="width:44%;float:left;"/>
-          <span style="float:left;">&nbsp;&#8596;&nbsp;</span>
+          <span style="float:left;">&nbsp;↔&nbsp;</span>
           <input type="text" class="form-control input-sm select_date" value="" name="date_end" style="width:44%;float:left;"/>
         </td>
         <td>
           <table class="table table-hover table-bordered">
             <tr>
               <td>
-              <strong>&#25552;&#20132;&#20316;&#19994;&#26102;&#38388;&#33539;&#22260;&#65306;</strong>
+              <strong>提交作业时间范围：</strong>
               </td>
               <td>
               <input type="text" class="form-control input-sm select_date" value="" name="homework_start" style="width:40%;display:inline;"/>
-              <span>&nbsp;&#8596;&nbsp;</span>
+              <span>&nbsp;↔&nbsp;</span>
               <input type="text" class="form-control input-sm select_date" value="" name="homework_end" style="width:40%;display:inline;"/>
               </td>
             </tr>
@@ -156,23 +156,23 @@
           <table class="table table-hover table-bordered">
             <tr>
               <td>
-                <input type="text" class="form-control" value="" name="event" placeholder="&#35838;&#31243;&#30340;&#36827;&#24230;&#23433;&#25490;" data-toggle="modal" data-target="#schedule_course">
+                <input type="text" class="form-control" value="" name="event" placeholder="课程的进度安排" data-toggle="modal" data-target="#schedule_course">
               </td>
               <td width="10%">
-                <input type="button" class="btn btn-info btn-sm new_schedule" value="&#28155;&#21152;"/>
+                <input type="button" class="btn btn-info btn-sm new_schedule" value="添加"/>
               </td>
             </tr>
           </table>
         </td>
         <td>
           <table class="table table-hover table-bordered">
-            <tr><th>&#36873;&#25321;&#35838;&#20214;</th></tr>
+            <tr><th>选择课件</th></tr>
             <tr><td><input type="file" multiple="multiple" name="schedule_ware"/></td></tr>
           </table>
           <table class="table table-hover table-bordered">
-            <tr><th>&#36873;&#25321;&#20316;&#19994;</th></tr>
+            <tr><th>选择作业</th></tr>
             <tr>
-            <td><input type="text" class="form-control" value="" name="homework" placeholder="&#20316;&#19994;&#30340;&#21629;&#21517;&#35268;&#33539;" data-toggle="popover" data-placement="top" data-content=""/><input type="file" multiple="multiple" name="schedule_work"/></td>
+            <td><input type="text" class="form-control" value="" name="homework" placeholder="作业的命名规范" data-toggle="popover" data-placement="top" data-content=""/><input type="file" multiple="multiple" name="schedule_work"/></td>
             </tr>
           </table>
         </td>
@@ -184,13 +184,13 @@
   {% endfor %}
   </div>
 </div>
-{% if 'id' in session.keys() and session['id'] < 500 %}
+{% if 'id' in session and session['id'] < 500 %}
 <div class="modal fade" style="width:100%" id="schedule_course" tabindex="-1" role="dialog" aria-labelledby="schedule_edit" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <strong class="modal-title" id="schedule_edit">&#32534;&#36753;&#35838;&#31243;&#36827;&#24230;&#65306;</strong>
+        <strong class="modal-title" id="schedule_edit">编辑课程进度：</strong>
       </div>
       <div class="modal-body">
         <link href="/static/css/font-awesome.min.css" rel="stylesheet">
@@ -200,13 +200,13 @@
         <script src="/static/js/bootstrap-wysiwyg.js"></script>
         <div class="btn-toolbar" data-role="editor-toolbar" data-target="#editor">
           <div class="btn-group">
-          <a class="btn dropdown-toggle" data-toggle="dropdown" title="&#23383;&#20307;&#26679;&#24335;"><i class="icon-font"></i><b class="caret"></b></a>
+          <a class="btn dropdown-toggle" data-toggle="dropdown" title="字体样式"><i class="icon-font"></i><b class="caret"></b></a>
           <ul class="dropdown-menu">
-            <li><a data-edit="fontName SimSun" style="font-family:SimSun">&#23435;&#20307;</a></li>
-            <li><a data-edit="fontName SimHei" style="font-family:SimHei">&#40657;&#20307;</a></li>
-            <li><a data-edit="fontName Microsoft YaHei" style="font-family:Microsoft YaHei">&#24494;&#36719;&#38597;&#40657;</a></li>
-            <li><a data-edit="fontName FangSong" style="font-family:FangSong">&#20223;&#23435;</a></li>
-            <li><a data-edit="fontName KaiTi" style="font-family:KaiTi">&#26999;&#20307;</a></li>
+            <li><a data-edit="fontName SimSun" style="font-family:SimSun">宋体</a></li>
+            <li><a data-edit="fontName SimHei" style="font-family:SimHei">黑体</a></li>
+            <li><a data-edit="fontName Microsoft YaHei" style="font-family:Microsoft YaHei">微软雅黑</a></li>
+            <li><a data-edit="fontName FangSong" style="font-family:FangSong">仿宋</a></li>
+            <li><a data-edit="fontName KaiTi" style="font-family:KaiTi">楷体</a></li>
             <li><a data-edit="fontName Courier New" style="font-family:Courier New">Courier New</a></li>
             <li><a data-edit="fontName Comic Sans MS" style="font-family:Comic Sans MS">Comic Sans MS</a></li>
             <li><a data-edit="fontName Impact" style="font-family:Impact">Impact</a></li>
@@ -215,53 +215,53 @@
           </ul>
           </div>
           <div class="btn-group">
-          <a class="btn dropdown-toggle" data-toggle="dropdown" title="&#23383;&#20307;&#22823;&#23567;"><i class="icon-text-height"></i><b class="caret"></b></a>
+          <a class="btn dropdown-toggle" data-toggle="dropdown" title="字体大小"><i class="icon-text-height"></i><b class="caret"></b></a>
             <ul class="dropdown-menu">
-            <li><a data-edit="fontSize 5"><font size="5">&#36739;&#22823;&#23383;&#20307;</font></a></li>
-            <li><a data-edit="fontSize 3"><font size="3">&#26222;&#36890;&#23383;&#20307;</font></a></li>
-            <li><a data-edit="fontSize 1"><font size="1">&#36739;&#23567;&#23383;&#20307;</font></a></li>
+            <li><a data-edit="fontSize 5"><font size="5">较大字体</font></a></li>
+            <li><a data-edit="fontSize 3"><font size="3">普通字体</font></a></li>
+            <li><a data-edit="fontSize 1"><font size="1">较小字体</font></a></li>
             </ul>
           </div>
           <div class="btn-group">
-          <a class="btn dropdown-toggle" data-toggle="dropdown" title="&#23383;&#20307;&#39068;&#33394;"><i class="icon-magic"></i><b class="caret"></b></a>
+          <a class="btn dropdown-toggle" data-toggle="dropdown" title="字体颜色"><i class="icon-magic"></i><b class="caret"></b></a>
             <ul class="dropdown-menu">
-            <li><a data-edit="ForeColor #000000" style="color:rgb(0,0,0)">&#40657; #000000</a></li>
-            <li><a data-edit="ForeColor #FF0000" style="color:rgb(255,0,0)">&#32418; #FF0000</a></li>
-            <li><a data-edit="ForeColor #FF8000" style="color:rgb(255,128,0)">&#27225; #FF8000</a></li>
-            <li><a data-edit="ForeColor #FFFF00" style="color:rgb(255,255,0)">&#40644; #FFFF00</a></li>
-            <li><a data-edit="ForeColor #00FF00" style="color:rgb(0,255,0)">&#32511; #00FF00</a></li>
-            <li><a data-edit="ForeColor #0000FF" style="color:rgb(0,0,255)">&#34013; #0000FF</a></li>
-            <li><a data-edit="ForeColor #8000FF" style="color:rgb(128,0,255)">&#32043; #8000FF</a></li>
+            <li><a data-edit="ForeColor #000000" style="color:rgb(0,0,0)">黑 #000000</a></li>
+            <li><a data-edit="ForeColor #FF0000" style="color:rgb(255,0,0)">红 #FF0000</a></li>
+            <li><a data-edit="ForeColor #FF8000" style="color:rgb(255,128,0)">橙 #FF8000</a></li>
+            <li><a data-edit="ForeColor #FFFF00" style="color:rgb(255,255,0)">黄 #FFFF00</a></li>
+            <li><a data-edit="ForeColor #00FF00" style="color:rgb(0,255,0)">绿 #00FF00</a></li>
+            <li><a data-edit="ForeColor #0000FF" style="color:rgb(0,0,255)">蓝 #0000FF</a></li>
+            <li><a data-edit="ForeColor #8000FF" style="color:rgb(128,0,255)">紫 #8000FF</a></li>
             </ul>
           </div>
           <div class="btn-group">
-            <a class="btn" data-edit="bold" title="&#21152;&#31895; (Ctrl/Cmd+B)"><i class="icon-bold"></i></a>
-            <a class="btn" data-edit="italic" title="&#26012;&#20307; (Ctrl/Cmd+I)"><i class="icon-italic"></i></a>
-            <a class="btn" data-edit="strikethrough" title="&#21024;&#38500;&#32447;"><i class="icon-strikethrough"></i></a>
-            <a class="btn" data-edit="underline" title="&#19979;&#21010;&#32447; (Ctrl/Cmd+U)"><i class="icon-underline"></i></a>
+            <a class="btn" data-edit="bold" title="加粗 (Ctrl/Cmd+B)"><i class="icon-bold"></i></a>
+            <a class="btn" data-edit="italic" title="斜体 (Ctrl/Cmd+I)"><i class="icon-italic"></i></a>
+            <a class="btn" data-edit="strikethrough" title="删除线"><i class="icon-strikethrough"></i></a>
+            <a class="btn" data-edit="underline" title="下划线 (Ctrl/Cmd+U)"><i class="icon-underline"></i></a>
           </div>
           <div class="btn-group">
-            <a class="btn" data-edit="insertunorderedlist" title="&#26080;&#24207;&#21015;&#34920;"><i class="icon-list-ul"></i></a>
-            <a class="btn" data-edit="insertorderedlist" title="&#32534;&#21495;&#21015;&#34920;"><i class="icon-list-ol"></i></a>
-            <a class="btn" data-edit="outdent" title="&#21521;&#24038;&#32553;&#36827; (Shift+Tab)"><i class="icon-indent-left"></i></a>
-            <a class="btn" data-edit="indent" title="&#21521;&#21491;&#32553;&#36827; (Tab)"><i class="icon-indent-right"></i></a>
+            <a class="btn" data-edit="insertunorderedlist" title="无序列表"><i class="icon-list-ul"></i></a>
+            <a class="btn" data-edit="insertorderedlist" title="编号列表"><i class="icon-list-ol"></i></a>
+            <a class="btn" data-edit="outdent" title="向左缩进 (Shift+Tab)"><i class="icon-indent-left"></i></a>
+            <a class="btn" data-edit="indent" title="向右缩进 (Tab)"><i class="icon-indent-right"></i></a>
           </div>
           <div class="btn-group">
-            <a class="btn" data-edit="justifyleft" title="&#24038;&#23545;&#40784; (Ctrl/Cmd+L)"><i class="icon-align-left"></i></a>
-            <a class="btn" data-edit="justifycenter" title="&#23621;&#20013;&#23545;&#40784; (Ctrl/Cmd+E)"><i class="icon-align-center"></i></a>
-            <a class="btn" data-edit="justifyright" title="&#21491;&#23545;&#40784; (Ctrl/Cmd+R)"><i class="icon-align-right"></i></a>
-            <a class="btn" data-edit="justifyfull" title="&#20004;&#31471;&#23545;&#40784; (Ctrl/Cmd+J)"><i class="icon-align-justify"></i></a>
+            <a class="btn" data-edit="justifyleft" title="左对齐 (Ctrl/Cmd+L)"><i class="icon-align-left"></i></a>
+            <a class="btn" data-edit="justifycenter" title="居中对齐 (Ctrl/Cmd+E)"><i class="icon-align-center"></i></a>
+            <a class="btn" data-edit="justifyright" title="右对齐 (Ctrl/Cmd+R)"><i class="icon-align-right"></i></a>
+            <a class="btn" data-edit="justifyfull" title="两端对齐 (Ctrl/Cmd+J)"><i class="icon-align-justify"></i></a>
           </div>
           <div class="btn-group">
-              <a class="btn dropdown-toggle" data-toggle="dropdown" title="&#36229;&#38142;&#25509;"><i class="icon-link"></i></a>
+              <a class="btn dropdown-toggle" data-toggle="dropdown" title="超链接"><i class="icon-link"></i></a>
                 <div class="dropdown-menu input-append">
                     <input class="span2" placeholder="URL" type="text" data-edit="createLink"/>
                     <button class="btn" type="button">Add</button>
                 </div>
-              <a class="btn" data-edit="unlink" title="&#31227;&#38500;&#38142;&#25509;"><i class="icon-cut"></i></a>
+              <a class="btn" data-edit="unlink" title="移除链接"><i class="icon-cut"></i></a>
           </div>
           <div class="btn-group">
-            <a class="btn" title="&#25554;&#20837;&#22270;&#29255;,&#25903;&#25345;&#25302;&#25341; (or just drag & drop)" id="pictureBtn"><i class="icon-picture"></i></a>
+            <a class="btn" title="插入图片,支持拖拽 (or just drag & drop)" id="pictureBtn"><i class="icon-picture"></i></a>
             <input type="file" data-role="magic-overlay" data-target="#pictureBtn" data-edit="insertImage" style="opacity: 0; position: absolute; top: 0px; left: 0px; width: 41px; height: 34px;" />
           </div>
           <div class="btn-group">
@@ -273,8 +273,8 @@
         <div id="editor" contenteditable="true"></div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default btn-sm cancel_submit" data-dismiss="modal">&#21462;&#28040;</button>
-        <button type="button" class="btn btn-primary btn-sm schedule_confirm" data-dismiss="modal">&#30830;&#23450;</button>
+        <button type="button" class="btn btn-default btn-sm cancel_submit" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary btn-sm schedule_confirm" data-dismiss="modal">确定</button>
       </div>
     </div>
   </div>

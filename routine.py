@@ -17,7 +17,7 @@ def everday_doing():
                 if time.strftime("%w",time.localtime(time.time())) == '0':
                     app.radio_news(1,"todo",'今天是本周最后一天,还没交作业的同学抓紧啦: <a href="/upload">上传作业</a>')
         except:
-            return 
+            return 1
 
 everday_doing_thread = threading.Thread(target=everday_doing,name="everday_doing")
 everday_doing_thread.setDaemon(True)

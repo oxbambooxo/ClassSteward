@@ -2,7 +2,7 @@
 {% block navbar_left %}
     <li><a href="/syllabus"><span class="glyphicon glyphicon-th-list"></span> 课程简介</a></li>
     <li><a href="/schedule"><span class="glyphicon glyphicon-list-alt"></span> 课程进度</a></li>
-    {% if 'id' in session.keys() and session['id'] < 500%}
+    {% if 'id' in session and session['id'] < 500%}
     <li><a href="/upload"><span class="glyphicon glyphicon-tasks"></span> 作业管理</a></li>
     {% else %}
     <li><a href="/upload"><span class="glyphicon glyphicon-open"></span> 上传作业</a></li>

@@ -29,7 +29,7 @@
   <script src="/static/js/jquery.min.js"></script>
   <script src="/static/js/bootstrap.min.js"></script>
   <!-- Loading the jQuery early,make sure sub's page can use jQuery. -->
-  <body {% if 'id' in session.keys() %}style="background-image:url('/static/img/{{session['light']}}.jpg')"{% endif %}>
+  <body {% if 'id' in session %}style="background-image:url('/static/img/{{session['light']}}.jpg')"{% endif %}>
     <!-- Fixed navbar -->
     <div class="navbar navbar-default {%if session['light'] == 'gray'%}navbar-inverse{%endif%}" role="navigation">
       <!--<div class="container {% if session['css'] == '1' %}col-lg-12 col-md-12 col-sm-12 col-xs-12{% endif %}">-->
@@ -43,7 +43,7 @@
             {% block navbar_left %}
             <li><a href="/syllabus"><span class="glyphicon glyphicon-th-list"></span> 课程简介</a></li>
             <li><a href="/schedule"><span class="glyphicon glyphicon-list-alt"></span> 课程进度</a></li>
-            {% if 'id' in session.keys() and session['id'] < 500%}
+            {% if 'id' in session and session['id'] < 500%}
             <li><a href="/upload"><span class="glyphicon glyphicon-tasks"></span> 作业管理</a></li>
             {% else %}
             <li><a href="/upload"><span class="glyphicon glyphicon-open"></span> 上传作业</a></li>
@@ -56,7 +56,7 @@
           <script src="/static/js/account.js"></script>
           {% if session['css'] == '1' %}<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6"></div>
           {%else%}<div class="col-lg-3 col-md-3 col-sm-3 col-xs-3"></div>{%endif%}
-          {% if 'id' in session.keys() %}
+          {% if 'id' in session %}
           <ul class="nav navbar-nav ">
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="{{session['id']}}" class="index_username">{{session['name']}}</span>

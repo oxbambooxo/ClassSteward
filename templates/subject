@@ -4,8 +4,8 @@
   {% set forum_length = forum['id']|length %}
   {% for i in range(forum_length) %}
   {% if forum['id'][i] == subject %}
-  <li><a href="/index">&#20027;&#39029;</a></li>
-  <li><a href="/forum">&#35770;&#22363;</a></li>
+  <li><a href="/index">主页</a></li>
+  <li><a href="/forum">论坛</a></li>
   <li><a href="/forum/{{forum['name'][i]}}">{{forum['nickname'][i]}}</a></li>
   <li class="active">{{topic['title']}}</li>
   <i id="topic" style="display:none">{{topic['id']}}</i>
@@ -28,18 +28,18 @@
         <div class="message-body" id="stair_{{i+2}}">
           <div class="text" style="padding:10px 10px 20px 10px;">
             <div>{{comment['content'][i]}}</div>
-            {%if 'id' in session.keys() and (session['id'] < 500 or session['id'] == comment['author'][i])%}
-              <a class="modify_comment" style="float:right;cursor:pointer;" id="{{comment['id'][i]}}">&#32534;&#36753;</a>
+            {%if 'id' in session and (session['id'] < 500 or session['id'] == comment['author'][i])%}
+              <a class="modify_comment" style="float:right;cursor:pointer;" id="{{comment['id'][i]}}">编辑</a>
             {%endif%}
           </div>
           <p class="attribution"><a>{{comment['author_name'][i]}}</a> {{comment['time'][i]}}
           <i class="icon-comment"></i>
-          <span>{%if comment['last_time'][i]%}&#26368;&#21518;&#32534;&#36753;&#20110;: {{comment['last_time'][i]}}{%endif%}&nbsp;&nbsp;{{page+i+1}}&#27004; </span>
+          <span>{%if comment['last_time'][i]%}最后编辑于: {{comment['last_time'][i]}}{%endif%}&nbsp;&nbsp;{{page+i+1}}楼 </span>
           </p>
-          {% if 'id' in session.keys() and session['id'] < 500 %}
+          {% if 'id' in session and session['id'] < 500 %}
             <button type="button" class="close delete_comment_confirm"><span aria-hidden="true">&times;</span></button>
             <div style="position:relative;display:none;">
-            <div class="alert alert-danger" role="alert" style="position:absolute;right:0px;bottom:0px;z-index:99;">&#30830;&#23450;&#21024;&#38500;&#35813;&#22238;&#22797;&#65311;<button type="button" class="btn btn-danger btn-xs delete_comment" comment="{{comment['id'][i]}}">&#30830;&#23450;</button></div>
+            <div class="alert alert-danger" role="alert" style="position:absolute;right:0px;bottom:0px;z-index:99;">确定删除该回复？<button type="button" class="btn btn-danger btn-xs delete_comment" comment="{{comment['id'][i]}}">确定</button></div>
             </div>
           {% endif %}
         </div>
@@ -50,10 +50,10 @@
           <a class="message-img"><img width="50" height="50" style="visibility:hidden;"/></a>
           <div class="message-body">
             <div class="text">{{replys['reply'][j]['content'][k]}}
-            {% if 'id' in session.keys() and session['id'] < 500 %}
+            {% if 'id' in session and session['id'] < 500 %}
               <button type="button" class="close delete_reply_confirm"><span aria-hidden="true">&times;</span></button>
               <div style="position:relative;display:none;">
-                <div class="alert alert-danger" role="alert" style="position:absolute;right:0px;z-index:99;">&#26159;&#21542;&#21024;&#38500;&#35813;&#24555;&#25463;&#22238;&#22797;&#65311;<button type="button" class="btn btn-danger btn-xs delete_reply" reply="{{replys['reply'][j]['id'][k]}}">&#30830;&#23450;</button>
+                <div class="alert alert-danger" role="alert" style="position:absolute;right:0px;z-index:99;">是否删除该快捷回复？<button type="button" class="btn btn-danger btn-xs delete_reply" reply="{{replys['reply'][j]['id'][k]}}">确定</button>
                 </div>
               </div>
             {% endif %}
@@ -63,7 +63,7 @@
           {% endfor %}
           </div>
           {% set re_count = replys['count'][j] %}
-          {% set re_maxpage = re_count//5+1 if (re_count//5)%5 != 0 else re_count//5 %}{# &#22238;&#22797;&#20197;5&#26465;&#26469;&#20998;&#39029; #}
+          {% set re_maxpage = re_count//5+1 if (re_count//5)%5 != 0 else re_count//5 %}{# 回复以5条来分页 #}
           {% if re_maxpage > 0 %}
           <a class="message-img"><img width="50" height="50" style="visibility:hidden;"></a>
           <div class="message-body">
@@ -81,8 +81,8 @@
         <a class="message-img"><img width="50" height="50" style="visibility:hidden;"></a>
         <div class="message-body">
           <div class="text">
-            <input type="text" class="form-control" placeholder="&#24555;&#36895;&#22238;&#22797;">
-            <button type="button" class="btn btn-default btn-xs fast_reply" comment="{{comment['id'][i]}}">&#22238;&#22797;</button>
+            <input type="text" class="form-control" placeholder="快速回复">
+            <button type="button" class="btn btn-default btn-xs fast_reply" comment="{{comment['id'][i]}}">回复</button>
           </div>
         </div>
         </div>
@@ -91,8 +91,8 @@
     </section>
 </div>
 <ul class="pagination col-lg-12 col-md-12 col-sm-12 col-xs-12">
-  {% set maxdivide = 27 %}{# &#39029;&#38754;&#26174;&#31034;&#20998;&#39029;&#30340;&#26368;&#22823;&#20998;&#39029;&#20010;&#25968;,&#26368;&#22909;&#20026;&#22855;&#25968;,&#20004;&#36793;&#20026;&#30465;&#30053;&#21495;&#30340;&#24773;&#20917;&#26102;&#21487;&#20197;&#26377;maxdivide//2 #}
-  {% set maxpage = count//divide+1 if (count//divide)%divide != 0 else count//divide %}{# &#19968;&#20849;&#26377;&#22810;&#23569;&#39029;&#25968; #}
+  {% set maxdivide = 27 %}{# 页面显示分页的最大分页个数,最好为奇数,两边为省略号的情况时可以有maxdivide//2 #}
+  {% set maxpage = count//divide+1 if (count//divide)%divide != 0 else count//divide %}{# 一共有多少页数 #}
   {% if maxpage > 0 %}
   {% if page < divide %}<li><a>&laquo;</a></li>
   {% else %}<li><a href="/forum/{{subject}}/{{topic['id']}}?p={{page-divide}}">&laquo;</a></li>
@@ -128,5 +128,5 @@
 {% block pronounce_js %}<script src="/static/js/subject.js"></script>{% endblock %}
 {% block pronounce_input %}{% endblock %}
 {% block pronounce_button %}
-<button type="button" class="btn btn-info col-lg-1 col-md-1 col-sm-1 col-xs-1" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-content="" data-loading-text="&#27491;&#22312;&#25552;&#20132;..." id="publish">&#22238;&#22797;</button>
+<button type="button" class="btn btn-info col-lg-1 col-md-1 col-sm-1 col-xs-1" data-toggle="popover" data-trigger="focus" data-placement="bottom" data-content="" data-loading-text="正在提交..." id="publish">回复</button>
 {% endblock %}

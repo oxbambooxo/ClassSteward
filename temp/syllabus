@@ -2,7 +2,7 @@
 {% block navbar_left %}
     <li class="active"><a href="/syllabus"><span class="glyphicon glyphicon-th-list"></span> 课程简介</a></li>
     <li><a href="/schedule"><span class="glyphicon glyphicon-list-alt"></span> 课程进度</a></li>
-    {% if 'id' in session.keys() and session['id'] < 500%}
+    {% if 'id' in session and session['id'] < 500%}
     <li><a href="/upload"><span class="glyphicon glyphicon-tasks"></span> 作业管理</a></li>
     {% else %}
     <li><a href="/upload"><span class="glyphicon glyphicon-open"></span> 上传作业</a></li>
@@ -12,7 +12,7 @@
 {% endblock %}
 {% block main %}
 <script src="/static/js/schedule.js"></script>
-{% if 'id' in session.keys() and session['id'] < 500 %}
+{% if 'id' in session and session['id'] < 500 %}
 <div class="panel panel-default">
     <div class="panel-heading" data-toggle="collapse" data-target="#course_syllabus" aria-expanded="true" aria-controls="course_syllabus"><h3 class="panel-title">课程简介 :</h3></div>
     <div class="table-responsive collapse in" id="course_syllabus">
@@ -65,7 +65,7 @@
               <td width="10%">
                 <div style="position:relative;">
                   <span>{{syllabus['head'][j]}}</span>
-                  {% if 'id' in session.keys() and session['id'] < 500 %}
+                  {% if 'id' in session and session['id'] < 500 %}
                   <input type="text" class="form-control" placeholder="填写标题" style="display:none;" />
                   <button type="button" class="btn btn-xs btn-default modify_syllabus_head" style="position:absolute;bottom:0px;left:0px;">修改</button>
                   {% endif %}
@@ -73,7 +73,7 @@
               </td>
               <td>
                 <div class="syllabus_detail">{{syllabus['detail'][j]}}</div>
-                {% if 'id' in session.keys() and session['id'] < 500 %}
+                {% if 'id' in session and session['id'] < 500 %}
                 <button type="button" class="btn btn-xs btn-default modify_syllabus_detail" style="float:left;">修改</button>
                 <button type="button" class="btn btn-xs btn-default delete_syllabus" style="float:right;">删除</button>
                 {% endif %}
@@ -81,7 +81,7 @@
             </tr>
       {% endif %}
       {% endfor %}
-      {% if 'id' in session.keys() and session['id'] < 500 %}
+      {% if 'id' in session and session['id'] < 500 %}
       <tr><td width="15%"><input type="text" class="form-control" name="syllabus_head" placeholder="填写标题"/></td>
           <td width="85%">
             <input type="text" class="form-control" name="syllabus_detail" placeholder="填写内容" data-toggle="modal" data-target="#syllabus_editor"/>
@@ -94,7 +94,7 @@
   {% endfor %}
   </div>
 </div>
-{% if 'id' in session.keys() and session['id'] < 500 %}
+{% if 'id' in session and session['id'] < 500 %}
 </div>
 <div class="modal fade" style="width:100%" id="syllabus_editor" tabindex="-1" role="dialog" aria-labelledby="syllabus_edit" aria-hidden="true">
   <div class="modal-dialog modal-lg">

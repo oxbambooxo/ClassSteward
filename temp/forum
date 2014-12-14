@@ -3,7 +3,7 @@
 {% block navbar_left %}
     <li><a href="/syllabus"><span class="glyphicon glyphicon-th-list"></span> 课程简介</a></li>
     <li><a href="/schedule"><span class="glyphicon glyphicon-list-alt"></span> 课程进度</a></li>
-    {% if 'id' in session.keys() and session['id'] < 500%}
+    {% if 'id' in session and session['id'] < 500%}
     <li><a href="/upload"><span class="glyphicon glyphicon-tasks"></span> 作业管理</a></li>
     {% else %}
     <li><a href="/upload"><span class="glyphicon glyphicon-open"></span> 上传作业</a></li>
@@ -38,7 +38,7 @@
         <td width="7%" class="text-center">{{topic['total'][i]}} / {{topic['view'][i]}}</td>
         <td width="18%"><a>{{topic['author'][i]}}</a>&nbsp;&nbsp;{{topic['time'][i]}}</td>
         <td width="23%">{{topic['last_author'][i]}}&nbsp;&nbsp;{{topic['last_time'][i]}}
-        {% if 'id' in session.keys() and (session['id'] < 500 or session['id'] == topic['author-id'][i])%}
+        {% if 'id' in session and (session['id'] < 500 or session['id'] == topic['author-id'][i])%}
           <button type="button" class="close delete_topic_confirm"><span aria-hidden="true">&times;</span></button>
           <div style="position:relative;display:none;">
             <div class="alert alert-danger" role="alert" style="position:absolute;right:0px;top:0px;z-index:99;">确定删除该帖？<button type="button" class="btn btn-danger btn-xs delete_topic" topic="{{topic['id'][i]}}">确定</button></div>

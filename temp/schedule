@@ -2,7 +2,7 @@
 {% block navbar_left %}
     <li><a href="/syllabus"><span class="glyphicon glyphicon-th-list"></span> 课程简介</a></li>
     <li class="active"><a href="/schedule"><span class="glyphicon glyphicon-list-alt"></span> 课程进度</a></li>
-    {% if 'id' in session.keys() and session['id'] < 500%}
+    {% if 'id' in session and session['id'] < 500%}
     <li><a href="/upload"><span class="glyphicon glyphicon-tasks"></span> 作业管理</a></li>
     {% else %}
     <li><a href="/upload"><span class="glyphicon glyphicon-open"></span> 上传作业</a></li>
@@ -27,13 +27,13 @@
       {% if schedule['course'][j] == course['name'][i] %}
       <tr {%for k in range(schedule['this_week']|length)%}{%if schedule['this_week'][k][0] == schedule['course'][j] and schedule['this_week'][k][1] == schedule['week'][j]%}class="info"{%endif%}{%endfor%}>
         <td class="week_id" week="{{schedule['week'][j]}}">第{{schedule['week'][j]}}周
-        {% if 'id' in session.keys() and session['id'] < 500 %}
+        {% if 'id' in session and session['id'] < 500 %}
           <button type="button" class="btn btn-xs btn-default delete_schedule" style="float:right;">删除</button>
         {% endif %}
         </td>
         <td>
           <span>{{schedule['date_start'][j]}} 到 {{schedule['date_end'][j]}}</span>
-          {% if 'id' in session.keys() and session['id'] < 500 %}
+          {% if 'id' in session and session['id'] < 500 %}
           <div style="display:none;">
             <input type="text" class="form-control input-sm select_date" value="{{schedule['date_start'][j]}}" style="padding:0px 0px 0px 5px;width:40%;display:inline;"/>
             <span>&nbsp;↔&nbsp;</span>
@@ -45,7 +45,7 @@
         </td>
         <td>
           <div class="schedule_event">{{schedule['event'][j]}}</div>
-          {% if 'id' in session.keys() and session['id'] < 500 %}
+          {% if 'id' in session and session['id'] < 500 %}
             <button type="button" class="btn btn-xs btn-default modify_schedule_event" style="float:left;">修改</button>
           {% endif %}
         </td>
@@ -54,12 +54,12 @@
           <div style="margin:3px 0px 0px 3px;">
             <span class="glyphicon glyphicon-tags"></span>&nbsp;&nbsp;
             <a target="_blank" href="/static/file/schedule/courseware/{{schedule['courseware'][j][k]}}">{{schedule['courseware'][j][k]}}</a>
-            {% if 'id' in session.keys() and session['id'] < 500 %}
+            {% if 'id' in session and session['id'] < 500 %}
               <button class="btn btn-danger btn-xs delete_courseware">删除</button>
             {% endif %}
           </div>
           {% endfor %}
-          {% if 'id' in session.keys() and session['id'] < 500 %}
+          {% if 'id' in session and session['id'] < 500 %}
             <form action="" method="POST" enctype="multipart/form-data" style="display:none;margin:3px 0px 3px 0px;">
               <input type="hidden" name="course" value="{{schedule['course'][j]}}"/>
               <input type="hidden" name="week" value="{{schedule['week'][j]}}"/>
@@ -78,12 +78,12 @@
           <div style="margin:3px 0px 0px 3px;">
             <span class="glyphicon glyphicon-tag"></span>&nbsp;&nbsp;
             <a target="_blank" href="/static/file/schedule/coursework/{{schedule['coursework'][j][k]}}">{{schedule['coursework'][j][k]}}</a>
-            {% if 'id' in session.keys() and session['id'] < 500 %}
+            {% if 'id' in session and session['id'] < 500 %}
               <button class="btn btn-danger btn-xs delete_coursework">删除</button>
             {% endif %}
           </div>
           {% endfor %}
-          {% if 'id' in session.keys() and session['id'] < 500 %}
+          {% if 'id' in session and session['id'] < 500 %}
             <form action="" method="POST" enctype="multipart/form-data" style="display:none;margin:3px 0px 3px 0px;">
               <input type="hidden" name="course" value="{{schedule['course'][j]}}"/>
               <input type="hidden" name="week" value="{{schedule['week'][j]}}"/>
@@ -98,13 +98,13 @@
             </form>
             <button class="btn btn-default btn-xs addition_file" style="display:block;">添加作业文件</button>
           {% endif %}
-          {% if 'id' in session.keys() and session['id'] < 500 and schedule['homework'][j]%}
+          {% if 'id' in session and session['id'] < 500 and schedule['homework'][j]%}
           <div style="margin:3px 0px 3px 3px;">
             <span class="glyphicon glyphicon-pencil"></span>&nbsp;{{schedule['homework'][j]}}
             <button class="btn btn-danger btn-xs delete_homework" style="float:right;">删除</button>
           </div>
           {% endif %}
-          {% if 'id' in session.keys() and session['id'] < 500 %}
+          {% if 'id' in session and session['id'] < 500 %}
             <input type="text" class="form-control" value="" style="display:none;" />
             <button class="btn btn-default btn-xs modify_schedule_homework" style="margin-left:3px">修改作业命名规范</button>
             <button class="btn btn-danger btn-xs cancel_schedule_homework" style="display:none;">取消</button>
@@ -114,7 +114,7 @@
             <span class="glyphicon glyphicon-pencil"></span>&nbsp;{{schedule['homework_start'][j]}} 到 {{schedule['homework_end'][j]}}
           </div>
           {% endif %}
-          {% if 'id' in session.keys() and session['id'] < 500 %}
+          {% if 'id' in session and session['id'] < 500 %}
           <div style="display:none;">
             <input type="text" class="form-control input-sm select_date" value="{{schedule['homework_start'][j]}}" style="padding:0px 0px 0px 5px;width:40%;display:inline;"/>
             <span>&nbsp;↔&nbsp;</span>
@@ -127,7 +127,7 @@
         </tr>
       {% endif %}
       {% endfor %}
-      {% if 'id' in session.keys() and session['id'] < 500 %}
+      {% if 'id' in session and session['id'] < 500 %}
       <tr>
       <form action="/schedule" method="POST" enctype="multipart/form-data" class="new_schedule_submit">
         <td>
@@ -184,7 +184,7 @@
   {% endfor %}
   </div>
 </div>
-{% if 'id' in session.keys() and session['id'] < 500 %}
+{% if 'id' in session and session['id'] < 500 %}
 <div class="modal fade" style="width:100%" id="schedule_course" tabindex="-1" role="dialog" aria-labelledby="schedule_edit" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">

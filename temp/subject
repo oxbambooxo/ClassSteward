@@ -28,7 +28,7 @@
         <div class="message-body" id="stair_{{i+2}}">
           <div class="text" style="padding:10px 10px 20px 10px;">
             <div>{{comment['content'][i]}}</div>
-            {%if 'id' in session.keys() and (session['id'] < 500 or session['id'] == comment['author'][i])%}
+            {%if 'id' in session and (session['id'] < 500 or session['id'] == comment['author'][i])%}
               <a class="modify_comment" style="float:right;cursor:pointer;" id="{{comment['id'][i]}}">编辑</a>
             {%endif%}
           </div>
@@ -36,7 +36,7 @@
           <i class="icon-comment"></i>
           <span>{%if comment['last_time'][i]%}最后编辑于: {{comment['last_time'][i]}}{%endif%}&nbsp;&nbsp;{{page+i+1}}楼 </span>
           </p>
-          {% if 'id' in session.keys() and session['id'] < 500 %}
+          {% if 'id' in session and session['id'] < 500 %}
             <button type="button" class="close delete_comment_confirm"><span aria-hidden="true">&times;</span></button>
             <div style="position:relative;display:none;">
             <div class="alert alert-danger" role="alert" style="position:absolute;right:0px;bottom:0px;z-index:99;">确定删除该回复？<button type="button" class="btn btn-danger btn-xs delete_comment" comment="{{comment['id'][i]}}">确定</button></div>
@@ -50,7 +50,7 @@
           <a class="message-img"><img width="50" height="50" style="visibility:hidden;"/></a>
           <div class="message-body">
             <div class="text">{{replys['reply'][j]['content'][k]}}
-            {% if 'id' in session.keys() and session['id'] < 500 %}
+            {% if 'id' in session and session['id'] < 500 %}
               <button type="button" class="close delete_reply_confirm"><span aria-hidden="true">&times;</span></button>
               <div style="position:relative;display:none;">
                 <div class="alert alert-danger" role="alert" style="position:absolute;right:0px;z-index:99;">是否删除该快捷回复？<button type="button" class="btn btn-danger btn-xs delete_reply" reply="{{replys['reply'][j]['id'][k]}}">确定</button>

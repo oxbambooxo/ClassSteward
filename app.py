@@ -18,24 +18,30 @@ def now():
 
 def news(user,origin,type,content):
     '''
-    需要推送到首页的消息可以通过这个函数插入消息到数据库
+    需要推送的消息可以通过这个函数插入消息到数据库
     '''
     with connect() as cursor:
         cursor.execute("insert into messages(user,origin,type,content) value(%d,%d,'%s','%s')"%(user,origin,type,content))
 
 def radio_news(origin,type,content):
+    '''
+    向所有用户推送消息
+    '''
     def radio(origin,type,content):
         with db.new() as cursor:
             cursor.execute("select id from user")
-            result=cursor.fetchall()
+            result = cursor.fetchall()
+            i = 0
             for r in result:
-                time.sleep(2)
+                if i%5 == 0:
+                    time.sleep(1)
+                i += 1
                 cursor.execute("select type,content from messages where user=%d order by time desc limit 0,1"%r[0])
-                temp=cursor.fetchone()
-                if not temp or type.decode('utf8')!=temp[0] or content.decode('utf8')!=temp[1]:
+                temp = cursor.fetchone()
+                if not temp or type.decode('utf8') != temp[0] or content.decode('utf8') != temp[1]:
                     cursor.execute("insert into messages(user,origin,type,content) value(%d,%d,'%s','%s')"%(r[0],origin,type,content))
-                if temp and type.decode('utf8')==temp[0] and content.decode('utf8')==temp[1]:
-                    cursor.execute("update messages set flag=0 where user=%d and type='%s' and content='%s'"%(r[0],type,content))
+                if temp and type.decode('utf8') == temp[0] and content.decode('utf8') == temp[1]:
+                    cursor.execute("update messages set flag=0,time=now() where user=%d and type='%s' and content='%s'"%(r[0],type,content))
     new=routine.threading.Thread(target=radio,args=(origin,type,content))
     new.setDaemon(True)
     new.start()
@@ -141,11 +147,11 @@ def regist():
                 for i in userinfo:
                     session[i]=userinfo[i]
                 db.memc.delete(request.args.get('check').encode('utf-8'))
-                news(session['id'],1,"mail","欢迎注册 Class Steward!")
-                news(session['id'],1,"agree","欢迎来到 Class Steward!")
+                news(session['id'],1,"mail","欢迎注册 Law&apos;s courses!")
+                news(session['id'],1,"agree","欢迎来到 Law&apos;s courses!")
                 return render_template('regist', status='success',enumerate=enumerate)
             else:
-                return render_template('regist',enumerate=enumerate)
+                return redirect(url_for('regist'))
         if request.args.get('request', None):
             with connect() as cursor:
                 status = cursor.execute("select * from user where account=%s"%request.args.get('request'))
@@ -204,6 +210,8 @@ def logout():
                 del datadict[session['db']]
             session.clear()
             return redirect(url_for('syllabus'))
+    else:
+        return redirect(url_for('syllabus'))
 
 @app.route('/account', methods=['GET', 'POST'])
 def account():
@@ -213,7 +221,6 @@ def account():
                 cursor.execute("update user set last_time=now() where id=%d" %(session['id'],))
                 cursor.execute("select count(*) from messages where user=%d and flag=0"%(session['id'],))
                 count=cursor.fetchone()[0]
-                print count
                 data=["user is living",count]
                 return jsonfix.dumps(data)
         if 'screen' in request.form:
@@ -312,7 +319,7 @@ def admin():
                 result=cursor.fetchall()
                 for r in result:
                     user_class.append(r[0])
-                cursor.execute("select id,account,class,name,regist_time,last_time,num from user where id>=500 order by class,num")
+                cursor.execute("select id,account,class,name,regist_time,last_time,num from user order by class,num")
                 result=cursor.fetchall()
                 for r in result:
                     userinfo['id'].append(r[0])
