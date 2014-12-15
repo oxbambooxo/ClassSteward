@@ -479,7 +479,7 @@ def user():
             cursor.execute("select id,account,passwd,class,num,name,regist_time,last_time,photo,light from user where id=%d"%(session['id'],))
             result = cursor.fetchone()
             userinfo = {'id':result[0],'account':result[1],'passwd':result[2],'class':result[3],'num':result[4],'name':result[5],'regist_time':result[6],'last_time':result[7],'photo':result[8],'light':result[9]}
-            cursor.execute("select id,(select subject from topic where id=c.topic),topic,(select count(*) from comment where topic = c.topic and id <= c.id),left(content,60),last_time,time from comment c where c.author='%s' order by time desc limit 0,%d"%(session['id'],divide));
+            cursor.execute("select id,(select subject from topic where id=c.topic),topic,(select count(*) from comment where topic = c.topic and id <= c.id),left(content,120),last_time,time from comment c where c.author='%s' order by time desc limit 0,%d"%(session['id'],divide));
             result = cursor.fetchall()
             for r in result:
                 comment['id'].append(r[0])
@@ -1030,30 +1030,29 @@ def file():
                 week=pathlist[1]
                 user_class=pathlist[2]
                 with connect() as cursor:
-                    cursor.execute("select num,name,(select total from homework where course='%s' and week='%s' and author=user.id),(select score from homework where course='%s' and week='%s' and author=user.id) from user where class='%s'"%(course,week,course,week,user_class))
-                    user=cursor.fetchall()
-                    class_total=len(user)
-                    cursor.execute("select homework from schedule where course='%s' and week='%s'"%(course,week))
-                    filename=cursor.fetchone()[0]
-                    for i,u in enumerate(user):
-                        num=str(u[0]) if u[0] > 10 else '0'+str(u[0])
-                        file_total["filename"].append(filename.replace('AA',user_class).replace('BB',num).replace('CC',u[1]))
-                        file_total["time"].append(None)
-                        file_total["flag"].append("undo")
-                        file_total["num"].append(u[0])
-                        file_total["push_total"].append(u[2])
-                        file_total["score"].append(u[3])
+                    status = cursor.execute("select num,name,(select total from homework where course='%s' and week='%s' and author=user.id),\
+                                                        (select score from homework where course='%s' and week='%s' and author=user.id),\
+                                                        (select filename from homework where course='%s' and week='%s' and author=user.id),\
+                                                        (select time from homework where course='%s' and week='%s' and author=user.id)\
+                                                        from user where class='%s'"%(course,week,course,week,course,week,course,week,user_class))
+                    if status:
+                        user=cursor.fetchall()
+                        class_total=len(user)
+                        status = cursor.execute("select homework from schedule where course='%s' and week='%s'"%(course,week))
+                        if status:
+                            filename=cursor.fetchone()[0]
+                            for i,u in enumerate(user):
+                                num=str(u[0]) if u[0] > 10 else '0'+str(u[0])
+                                file_total["filename"].append(filename.replace('AA',user_class).replace('BB',num).replace('CC',u[1]))
+                                file_total["num"].append(u[0])
+                                file_total["push_total"].append(u[2])
+                                file_total["score"].append(u[3])
+                                flag = 'do' if u[4] else 'undo'
+                                file_total["flag"].append(flag)
+                                file_total["time"].append(u[5])
             try:
                 path="./static/file/homework/"+path
                 path_dir=[i for i in os.listdir(path) if os.path.isdir(path+i)]
-                path_file=[]
-                if len(pathlist) == 4:
-                    path_file=[(i,time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(os.stat(path+i).st_ctime))) for i in os.listdir(path) if os.path.isfile(path+i)]
-                    for p in path_file:
-                        if p[0] in file_total["filename"]:
-                            j=file_total["filename"].index(p[0])
-                            file_total["flag"][j]="do"
-                            file_total["time"][j]=p[1]
                 data={"dir":path_dir,"class_total":class_total,"file_total":file_total}
                 return jsonfix.dumps(data)
             except Exception as e:
@@ -1137,10 +1136,10 @@ def draw():
         if 'draw_user' in request.form:
             user=request.form['user']
             course_list=request.form['course'].split(',')
-            course_sql=reduce(lambda x,y:x+' or '+y,map(lambda x:"author="+user+" and course='"+x+"'",course_list))
+            course_sql=reduce(lambda x,y:x+' or '+y,map(lambda x:"course='"+x+"'",course_list))
             draw_data=[]
             with connect() as cursor:
-                sql="select course,score from homework as h where "+course_sql+" order by course,week"
+                sql="select course,score from homework as h where author="+user+" and "+course_sql+" order by course,week"
                 #course,score
                 cursor.execute(sql)
                 result=cursor.fetchall()
