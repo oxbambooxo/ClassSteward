@@ -235,17 +235,18 @@ def account():
                     result = cursor.fetchone()
                     if time.time() - time.mktime(result[5].utctimetuple()) > 60:
                         session['name']        = result[0]
-                        session['passwd']      = result[1]
+                        #session['passwd']      = result[1]
                         session['id']          = result[2]
                         session['account']     = result[3]
-                        session['regist_time'] = result[4]
-                        session['last_time']   = result[5]
+                        #session['regist_time'] = result[4]
+                        #session['last_time']   = result[5]
                         session['photo']       = result[6]
                         session['css']         = unicode(result[7])
-                        session['class']       = result[8]
-                        session['num']         = result[9]
+                        #session['class']       = result[8]
+                        #session['num']         = result[9]
                         session['light']       = result[10]
                         session['db']          = str(random.randint(1000,9999))
+                        session['view']        = []
                         return "login success"
                     else:
                         return "login conflict"
@@ -580,7 +581,9 @@ def forum(subject=999999,topic=None):
             page = count - count % divide if page >= count else page
             if topic:
                 #帖子页面:
-                cursor.execute("update topic set view=view+1 where subject=%d and id=%d"%(subject,topic))
+                if 'view' in session and topic not in session['view']:
+                    session['view'].append(topic)
+                    cursor.execute("update topic set view=view+1 where subject=%d and id=%d"%(subject,topic))
                 cursor.execute("select title,id from topic where subject=%d and id=%d"%(subject,topic))
                 result=cursor.fetchone()
                 topic={}

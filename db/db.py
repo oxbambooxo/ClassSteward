@@ -57,7 +57,7 @@ if memcache_['reload'] == 'true':
     os.system(cwd + "memcached -d stop 2>nul")
     os.system(cwd + "memcached -d uninstall 2>nul")
 os.system(cwd + "memcached -d install 2>nul")
-os.system(cwd + "memcached -l " + memcache_['host'] + " -p " + memcache_['port'] + " -c " + memcache_['maxline'] + " -m " + memcache_['maxmem'] + " -d start 2>null")
+os.system(cwd + "memcached -l " + memcache_['host'] + " -p " + memcache_['port'] + " -c " + memcache_['maxline'] + " -m " + memcache_['maxmem'] + " -d start 2>nul")
 #memcached -l 127.0.0.1 -p 11211 -c 1024 -m 64
 memc = memcache.Client([memcache_['host'] + ':' + memcache_['port']], debug=0)
 
