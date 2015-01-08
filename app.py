@@ -77,15 +77,13 @@ def syllabus(path='syllabus'):
         mesg=None
         with db.new() as cursor:
             cursor.execute("select id,name,class,teacher from course")
-            result=cursor.fetchall()
-            for r in result:
+            for r in cursor.fetchall():
                 course['id'].append(r[0])
                 course['name'].append(r[1])
                 course['class'].append(r[2])
                 course['teacher'].append(r[3])
             cursor.execute("select id,name,head,detail from syllabus")
-            result=cursor.fetchall()
-            for r in result:
+            for r in cursor.fetchall():
                 syllabus['id'].append(r[0])
                 syllabus['name'].append(r[1])
                 syllabus['head'].append(r[2])
@@ -100,7 +98,6 @@ def syllabus(path='syllabus'):
             return data
         if 'delete_syllabus' in request.form:
             with connect() as cursor:
-                print "delete from syllabus where id='%s'"%(request.form['id'],)
                 cursor.execute("delete from syllabus where id='%s'"%(request.form['id'],))
             return "delete syllabus success"
         if 'modify_syllabus_head' in request.form:
@@ -119,12 +116,10 @@ def regist():
             regist={'question':[],'userclass':[]}
             with connect() as cursor:
                 cursor.execute("select question from regist")
-                result=cursor.fetchall()
-                for r in result:
+                for r in cursor.fetchall():
                     regist['question'].append(r[0])
                 cursor.execute("select name from class")
-                result=cursor.fetchall()
-                for r in result:
+                for r in cursor.fetchall():
                     regist['userclass'].append(r[0])
             return render_template('regist',regist=regist,enumerate=enumerate)
         if request.args.get('check', None):
@@ -171,8 +166,7 @@ def regist():
         regist={'question':[],'answer':[]}
         with connect() as cursor:
             cursor.execute("select question,answer from regist")
-            result=cursor.fetchall()
-            for r in result:
+            for r in cursor.fetchall():
                 regist['question'].append(r[0])
                 regist['answer'].append(r[1])
         i=0
@@ -279,14 +273,18 @@ def message():
                 cursor.execute("select (select name from user where id=messages.origin),type,content,time from messages where user='%s' order by id asc"%(session['id'],))
             else:
                 cursor.execute("select (select name from user where id=messages.origin),type,content,time from messages where user='%s' and flag=0 order by id asc"%(session['id'],))
-            result=cursor.fetchall()
             data=[]
-            for r in result:
+            for r in cursor.fetchall():
                 data.append(r)
             cursor.execute("update messages set flag=1 where user='%s'"%(session['id'],))
         def generate():
             yield "data:"+jsonfix.dumps(data)+"\n\n"
             #不是用ajax也不是用comet,用html5的服务器推送模式,末尾要加两个\n.
+            #yield的作用和php的flush一样
+            #如果在生成器中加入time.sleep(0.5),并把yield改为
+            #for i in data:
+            #    yield "data:"+jsonfix.dumps(i)+"\n\n"
+            #就会有流模式的效果,每 0.5 秒js的EventSource就会收到 i
         Return=Response(stream_with_context(generate()), headers = [('Content-Type','text/event-stream; charset=utf-8'),('Cache-Control','no-cache')])
         session['flag'] = 1
         return Return
@@ -303,26 +301,21 @@ def admin():
             userinfo ={'id':[],'account':[],'class':[],'name':[],'regist_time':[],'last_time':[],'num':[]}
             with connect() as cursor:
                 cursor.execute("select question,answer from regist")
-                result=cursor.fetchall()
-                for r in result:
+                for r in cursor.fetchall():
                     regist['question'].append(r[0])
                     regist['answer'].append(r[1])
                 cursor.execute("select name from class")
-                result=cursor.fetchall()
-                for r in result:
+                for r in cursor.fetchall():
                     regist['class'].append(r[0])
                 cursor.execute("select name,nickname from forum")
-                result=cursor.fetchall()
-                for r in result:
+                for r in cursor.fetchall():
                     forum['name'].append(r[0])
                     forum['nickname'].append(r[1])
                 cursor.execute("select class from user where id >= 500 group by class")
-                result=cursor.fetchall()
-                for r in result:
+                for r in cursor.fetchall():
                     user_class.append(r[0])
                 cursor.execute("select id,account,class,name,regist_time,last_time,num from user order by class,num")
-                result=cursor.fetchall()
-                for r in result:
+                for r in cursor.fetchall():
                     userinfo['id'].append(r[0])
                     userinfo['account'].append(r[1])
                     userinfo['class'].append(r[2])
@@ -356,8 +349,7 @@ def admin():
             user_name=request.form['name'].split()[0]
             with connect() as cursor:
                 cursor.execute("select course,week,filename from homework where author='%s'"%user_id)
-                result=cursor.fetchall()
-                for r in result:
+                for r in cursor.fetchall():
                     course=r[0]
                     week=r[1]
                     old_filename=r[2]
@@ -374,8 +366,7 @@ def admin():
             user_name=request.form['name'].split()[0]
             with connect() as cursor:
                 cursor.execute("select course,week,filename from homework where author='%s'"%user_id)
-                result=cursor.fetchall()
-                for r in result:
+                for r in cursor.fetchall():
                     course=r[0]
                     week=r[1]
                     old_filename=r[2]
@@ -392,8 +383,7 @@ def admin():
             num=request.form['num'].split()[0]
             with connect() as cursor:
                 cursor.execute("select course,week,filename from homework where author='%s'"%user_id)
-                result=cursor.fetchall()
-                for r in result:
+                for r in cursor.fetchall():
                     course=r[0]
                     week=r[1]
                     old_filename=r[2]
@@ -406,8 +396,7 @@ def admin():
         if "delete_user" in request.form:
             with connect() as cursor:
                 cursor.execute("select course,week,(select class from user where id=homework.author),filename from homework where author=(select id from user where account='%s')"%request.form['user_account'])
-                result=cursor.fetchall()
-                for r in result:
+                for r in cursor.fetchall():
                     path="./static/file/homework/"+r[0].encode('gbk')+'/'+str(r[1])+'/'+r[2].encode('gbk')+'/'+r[3].encode('gbk')
                     delete(path)
                 cursor.execute("delete from user where account='%s'"%request.form['user_account'])
@@ -465,8 +454,7 @@ def user():
             comment = {'id':[],'src':[],'content':[],'time':[]}
             with connect() as cursor:
                 cursor.execute("select id,(select subject from topic where id=c.topic),topic,(select count(*) from comment where topic = c.topic and id <= c.id),left(content,60),last_time,time from comment c where c.author='%s' order by time desc limit %d,%d"%(session['id'],page*divide,divide));
-                result = cursor.fetchall()
-                for r in result:
+                for r in cursor.fetchall():
                     comment['id'].append(r[0])
                     src = '/forum/'+str(r[1])+'/'+str(r[2])+'?p='+str(r[3])+'#stair_'+str(r[3]%15)
                     comment['src'].append(src)
@@ -481,8 +469,7 @@ def user():
             result = cursor.fetchone()
             userinfo = {'id':result[0],'account':result[1],'passwd':result[2],'class':result[3],'num':result[4],'name':result[5],'regist_time':result[6],'last_time':result[7],'photo':result[8],'light':result[9]}
             cursor.execute("select id,(select subject from topic where id=c.topic),topic,(select count(*) from comment where topic = c.topic and id <= c.id),left(content,120),last_time,time from comment c where c.author='%s' order by time desc limit 0,%d"%(session['id'],divide));
-            result = cursor.fetchall()
-            for r in result:
+            for r in cursor.fetchall():
                 comment['id'].append(r[0])
                 src = '/forum/'+str(r[1])+'/'+str(r[2])+'?p='+str(r[3])+'#stair_'+str(r[3]%15)
                 comment['src'].append(src)
@@ -533,9 +520,8 @@ def forum(subject=999999,topic=None):
         #取得当前subject和论坛表的记录
         with connect() as cursor:
             cursor.execute("select id from forum")
-            result=cursor.fetchall()
             count=[]
-            for r in result:
+            for r in cursor.fetchall():
                 count.append(r[0])
             if not count:
                 return redirect(url_for('syllabus'))
@@ -556,9 +542,8 @@ def forum(subject=999999,topic=None):
             else:
                 subject=cursor.fetchone()[0]
             cursor.execute("select id,name,nickname from forum")
-            result = cursor.fetchall()
             forum  ={'id':[],'name':[],'nickname':[]}
-            for r in result:
+            for r in cursor.fetchall():
                 forum['id'].append(r[0])
                 forum['name'].append(r[1])
                 forum['nickname'].append(r[2])
@@ -581,6 +566,10 @@ def forum(subject=999999,topic=None):
             page = count - count % divide if page >= count else page
             if topic:
                 #帖子页面:
+                if 'view' not in session:
+                    session['view'] = []
+                    session['view'].append(topic)
+                    cursor.execute("update topic set view=view+1 where subject=%d and id=%d"%(subject,topic))
                 if 'view' in session and topic not in session['view']:
                     session['view'].append(topic)
                     cursor.execute("update topic set view=view+1 where subject=%d and id=%d"%(subject,topic))
@@ -590,10 +579,9 @@ def forum(subject=999999,topic=None):
                 topic['title']=result[0]
                 topic['id']=result[1]
                 cursor.execute("select id,author,(select photo from user where id=comment.author),(select name from user where id=comment.author),content,time,last_time from comment where topic=%d order by time limit %d,%d"%(topic['id'],page,divide))
-                result  =cursor.fetchall()
                 comment ={'id':[],'author':[],'author_photo':[],'author_name':[],'content':[],'time':[],'last_time':[]}
                 replys={'comment':[],'count':[],'reply':[]}
-                for r in result:
+                for r in cursor.fetchall():
                     comment['id'].append(r[0])
                     comment['author'].append(r[1])
                     photo = r[2] if r[2] else '26'
@@ -631,9 +619,8 @@ def forum(subject=999999,topic=None):
             else:
                 #论坛页面:
                 cursor.execute('select id,left(title,50),time,last_time,view,total,type,(select (select name from user where id=comment.author) from comment where topic=topic.id and id=(select min(id) from comment where topic=topic.id)),(select name from user where id=topic.last_author),(select author from comment where topic=topic.id and id=(select min(id) from comment where topic=topic.id)) from topic where subject=%d order by type,time desc limit %d,%d'%(subject,page,divide))
-                result =cursor.fetchall()
                 topic  ={'id':[],'title':[],'time':[],'last_time':[],'view':[],'total':[],'type':[],'author':[],'last_author':[],'author-id':[]}
-                for i,r in enumerate(result):
+                for i,r in enumerate(cursor.fetchall()):
                     topic['id'].append(r[0])
                     topic['title'].append(r[1])
                     topic['time'].append(r[2])
@@ -753,9 +740,8 @@ def reply(comment=None,page=None):
     if request.method == 'GET':
         with connect() as cursor:
             cursor.execute("select id,(select name from user where id=reply.author),content,time from reply where comment=%d order by time limit %d,5"%(comment,(page-1)*5))
-            result = cursor.fetchall()
             reply={'id':[],'author':[],'content':[],'time':[]}
-            for r in result:
+            for r in cursor.fetchall():
                 reply['id'].append(r[0])
                 author = r[1] if r[1] else '&#x8be5;&#x7528;&#x6237;&#x5df2;&#x88ab;&#x5220;&#x9664;'
                 reply['author'].append(author)
@@ -771,16 +757,14 @@ def schedule(path=None):
         schedule ={'course':[],'week':[],'date_start':[],'date_end':[],'event':[],'homework':[],'homework_start':[],'homework_end':[],'coursework':[],'courseware':[],'this_week':[]}
         with connect() as cursor:
             cursor.execute("select id,name,class,teacher from course")
-            result=cursor.fetchall()
-            for r in result:
+            for r in cursor.fetchall():
                 course['id'].append(r[0])
                 course['name'].append(r[1])
                 course['class'].append(r[2])
                 course['teacher'].append(r[3])
             cursor.execute("select course,week,date_start,date_end,event,homework,homework_start,homework_end,coursework,courseware from schedule order by week")
-            result=cursor.fetchall()
             this_week=datetime.datetime.now()
-            for r in result:
+            for r in cursor.fetchall():
                 schedule['course'].append(r[0])
                 schedule['week'].append(r[1])
                 schedule['date_start'].append(r[2].strftime('%Y-%m-%d'))
@@ -920,9 +904,8 @@ def upload():
         if 'id' in session and session['id'] >= 500:
             with connect() as cursor:
                 cursor.execute("select (select id from course where name=homework.course),course,week,(select class from user where id=%d),filename,time,total,score from homework where author=%d"%(session['id'],session['id']))
-                result=cursor.fetchall()
                 homework={'course_id':[],'course':[],'week':[],'class':[],'filename':[],'time':[],'total':[],'score':[]}
-                for r in result:
+                for r in cursor.fetchall():
                     homework['course_id'].append(r[0])
                     homework['course'].append(r[1])
                     homework['week'].append(r[2])
@@ -946,12 +929,10 @@ def filemanage():
             user={'class':[],'num':[],'name':[]}
             with connect() as cursor:
                 cursor.execute("select name from course")
-                result=cursor.fetchall()
-                for r in result:
+                for r in cursor.fetchall():
                     course_name.append(r[0])
                 cursor.execute("select class from user where id>=500 group by class")
-                result=cursor.fetchall()
-                for r in result:
+                for r in cursor.fetchall():
                     user_class.append(r[0])
             return render_template('filemanage',course=course_name,user_class=user_class)
         else:
@@ -968,9 +949,8 @@ def file():
                 user_class=cursor.fetchone()[0]
                 cursor.execute("select (select id from course where name=schedule.course),course,week,homework from schedule where homework!='' and now()>homework_start and now()<homework_end and course in (select name from course where class like '%%%s%%') order by course"%(user_class))
                 #之前时间没有精确到分秒的时候是00:00，所以需要往后加一天date_add(homework_end,interval 1 day)
-                result=cursor.fetchall()
                 schedule={'course_id':[],'course':[],'week':[],'homework':[]}
-                for r in result:
+                for r in cursor.fetchall():
                     schedule['course_id'].append(r[0])
                     schedule['course'].append(r[1])
                     schedule['week'].append(r[2])
@@ -1083,8 +1063,7 @@ def draw():
             user={'class':[],'num':[],'name':[],'id':[]}
             with connect() as cursor:
                 cursor.execute("select class,num,name,id from user where id>=500 order by class,num")
-                result=cursor.fetchall()
-                for r in result:
+                for r in cursor.fetchall():
                     user['class'].append(r[0])
                     user['num'].append(r[1])
                     user['name'].append(r[2])
@@ -1166,7 +1145,7 @@ def draw():
 #@app.errorhandler(404)
 #@app.errorhandler(500)
 
-app.secret_key = 'Sz@rkrty#$X^R~o&H!=N{]}L*/.?RT'
+app.secret_key = 'Sz@rkrty#$X^R~o&k!=N{]}L*/.?RT'
 app.cache = MemcachedCache([db.memcache_['host'], db.memcache_['port']])
 app.session_interface = Session()
 #将flask的session存储方式改为在memcached中,不采用默认的客户端存储方式.
