@@ -754,15 +754,16 @@ def reply(comment=None,page=None):
 @app.route('/schedule', methods=['GET', 'POST'])
 def schedule(path=None):
     if request.method == 'GET':
-        course   ={'id':[],'name':[],'class':[],'teacher':[]}
+        course   ={'id':[],'name':[],'class':[],'teacher':[],'status':[]}
         schedule ={'course':[],'week':[],'date_start':[],'date_end':[],'event':[],'homework':[],'homework_start':[],'homework_end':[],'coursework':[],'courseware':[],'this_week':[]}
         with connect() as cursor:
-            cursor.execute("select id,name,class,teacher from course")
+            cursor.execute("select id,name,class,teacher,status from course order by status desc")
             for r in cursor.fetchall():
                 course['id'].append(r[0])
                 course['name'].append(r[1])
                 course['class'].append(r[2])
                 course['teacher'].append(r[3])
+                course['status'].append(r[4])
             cursor.execute("select course,week,date_start,date_end,event,homework,homework_start,homework_end,coursework,courseware from schedule order by week")
             this_week=datetime.datetime.now()
             for r in cursor.fetchall():
