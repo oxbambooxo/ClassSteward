@@ -25,6 +25,13 @@
             <td>
                 {{course['teacher'][i]}}
                 <input type="button" class="btn btn-default delete_course" value="删除" style="float:right;" />
+                {% if course['status'][i] %}
+                  <input type="button" class="btn btn-warning hide_course" value="隐藏" style="float:right;" />
+                  <input type="button" class="btn btn-default show_course" value="显示" style="float:right;" />
+                {% else %}
+                  <input type="button" class="btn btn-default hide_course" value="隐藏" style="float:right;" />
+                  <input type="button" class="btn btn-info show_course" value="显示" style="float:right;" />
+                {% endif %}
             </td>
         </tr>
         {% endfor %}
@@ -52,7 +59,9 @@
 <div id="course_syllabus_detail">
   <ul class="nav nav-tabs" role="tablist">
   {% for i in range(course['name']|length)%}
+  {% if course['status'][i] %}
     <li {% if i==0 %} class="active" {% endif %} ><a href="#course_{{course['id'][i]}}" role="tab" data-toggle="tab">{{course['name'][i]}}</a></li>
+  {% endif %}
   {% endfor %}
   </ul>
   <div class="tab-content">
@@ -60,7 +69,7 @@
     <div class="table-responsive tab-pane fade in {% if i==0 %} active {% endif %}" id="course_{{course['id'][i]}}" course="{{course['name'][i]}}">
       <table class="table table-hover table-bordered" style="margin-bottom:0px;">
       {% for j in range(syllabus['name']|length)%}
-      {% if syllabus['name'][j] == course['name'][i] %}
+      {% if syllabus['name'][j] == course['name'][i] and course['status'][i] != 0 %}
             <tr syllabus="{{syllabus['id'][j]}}">
               <td width="10%">
                 <div style="position:relative;">

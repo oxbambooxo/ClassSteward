@@ -55,7 +55,8 @@ create table course
     id int auto_increment primary key,
     name varchar(30) unique,
     class varchar(50) not null,
-    teacher varchar(30) not null
+    teacher varchar(30) not null,
+    status int default 1 not null
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

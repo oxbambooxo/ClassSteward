@@ -100,6 +100,8 @@ $(document).ready(function()
         $(this).addClass('confirm_delete_course');
         $(this).addClass('btn-danger');
         $(this).val("确定");
+        btn = $(this);
+        setTimeout(function(){btn.removeClass("confirm_delete_course btn-danger");btn.val("删除");},1500);
     });
 
     $(document).on("click",".confirm_delete_course",function()
@@ -127,6 +129,31 @@ $(document).ready(function()
                         $(schedule_contents[i]).remove();
                     }
                 }
+            }
+        });
+    });
+    
+    $(document).on("click",".hide_course",function()
+    {
+        var course_name=$(this).parent().prev().prev().text();
+        console.log(course_name);
+        $.post("/schedule",{hide_course:"yes",course_name:course_name},function(data,status)
+        {
+            if(data=="hide course success")
+            {
+                location=location;
+            }
+        });
+    });
+
+    $(document).on("click",".show_course",function()
+    {
+        var course_name=$(this).parent().prev().prev().text();
+        $.post("/schedule",{show_course:"yes",course_name:course_name},function(data,status)
+        {
+            if(data=="show course success")
+            {
+                location=location;
             }
         });
     });

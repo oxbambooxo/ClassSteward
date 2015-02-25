@@ -72,16 +72,17 @@ def syllabus(path='syllabus'):
         # 用file变量获取用户输入的url,可以实现任意后缀访问页面.
         if path.split('.')[0] in ['regist','schedule','download','upload','forum']: 
             return redirect(url_for(path.split('.')[0]))
-        course   ={'id':[],'name':[],'class':[],'teacher':[]}
+        course   ={'id':[],'name':[],'class':[],'teacher':[],'status':[]}
         syllabus ={'id':[],'name':[],'head':[],'detail':[]}
         mesg=None
         with db.new() as cursor:
-            cursor.execute("select id,name,class,teacher from course")
+            cursor.execute("select id,name,class,teacher,status from course order by status desc")
             for r in cursor.fetchall():
                 course['id'].append(r[0])
                 course['name'].append(r[1])
                 course['class'].append(r[2])
                 course['teacher'].append(r[3])
+                course['status'].append(r[4])
             cursor.execute("select id,name,head,detail from syllabus")
             for r in cursor.fetchall():
                 syllabus['id'].append(r[0])
@@ -794,6 +795,14 @@ def schedule(path=None):
             with connect() as cursor:
                 cursor.execute("delete from course where name='%s'"%(request.form['course_name']))
             return "delete course success"
+        if "hide_course" in request.form:
+            with connect() as cursor:
+                cursor.execute("update course set status=0 where name='%s'"%(request.form['course_name']))
+            return "hide course success"
+        if "show_course" in request.form:
+            with connect() as cursor:
+                cursor.execute("update course set status=1 where name='%s'"%(request.form['course_name']))
+            return "show course success"
         if "new_schedule" in request.form:
             coursework=''
             for f in request.files.getlist("schedule_work"):
