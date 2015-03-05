@@ -10,6 +10,7 @@ import datetime
 import jsonfix
 from functools import reduce
 import os
+import re
 
 app = Flask(__name__)
 
@@ -701,7 +702,7 @@ def forum(subject=999999,topic=None):
                             if total >= 25:break
                         title=title[:total]+"..."
                     s=reduce(lambda x,y:str(x)+str(y),("&#"+str(ord(i))+";" for i in title))
-                    content=[request.form['href'],s]
+                    content=[re.search('/forum.*$',request.form['href']).group(),s]
             if user != session['id']:
                 news(user,session['id'],"reply",jsonfix.dumps(content))
             return "reply comment success"
