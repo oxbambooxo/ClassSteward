@@ -182,7 +182,7 @@ $(document).ready(function()
                 input.removeClass("warning");
                 input.removeClass("success");
                 input.removeClass("danger");
-                $("#add_help").text("请输入邮箱");
+                $("#add_help").text("请输入用户名");
                 $("#new_admin").val("");
             });
         }

@@ -9,6 +9,7 @@ $(document).ready(function()
             if(data=="delete file success")
             {
                 file_tr.remove();
+                $('.total_help').text('');
             }
         });
     });

@@ -404,7 +404,7 @@ def admin():
             return "delete user success"
         if "new_admin" in request.form:
             with connect() as cursor:
-                cursor.execute("select count(*) from user where id < 500")
+                cursor.execute("select max(id) from user where id < 500")
                 count=cursor.fetchone()[0]
                 cursor.execute("update user set id=%d where account='%s'"%(count+1,request.form["user_account"]))
                 cursor.execute("select id from user where account='%s'"%(request.form["user_account"]))
