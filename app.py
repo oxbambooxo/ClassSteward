@@ -238,8 +238,8 @@ def account():
                         #session['last_time']   = result[5]
                         session['photo']       = result[6]
                         session['css']         = unicode(result[7])
-                        #session['class']       = result[8]
-                        #session['num']         = result[9]
+                        session['class']       = result[8]
+                        session['num']         = result[9]
                         session['light']       = result[10]
                         session['db']          = str(random.randint(1000,9999))
                         session['view']        = []
