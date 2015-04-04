@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 from flask import *
-from flask.ext.memcache_session import Session
-from werkzeug.contrib.cache import MemcachedCache
 import random
 import db
 import routine
@@ -1157,9 +1155,6 @@ def draw():
 #@app.errorhandler(500)
 
 app.secret_key = 'Sz@rkrty#$X^R~o&k!=N{]}L*/.?RT'
-app.cache = MemcachedCache([db.memcache_['host'], db.memcache_['port']])
-app.session_interface = Session()
-#将flask的session存储方式改为在memcached中,不采用默认的客户端存储方式.
 
 if __name__ == '__main__':
     app.config['DEBUG'] = True
