@@ -119,7 +119,7 @@ create table topic
     subject int not null,
     title tinytext not null,
     time timestamp default CURRENT_TIMESTAMP not null,
-    last_time timestamp not null,
+    last_time timestamp default CURRENT_TIMESTAMP not null,
     author int,
     last_author int,
     view int default 0 not null,
@@ -127,7 +127,7 @@ create table topic
     type int default 100 not null,
     constraint topic_subject_fk foreign key (subject) references forum(id) on delete cascade on update cascade,
     constraint topic_author_fk foreign key (author) references user(id) on delete set null on update cascade,
-    constraint topic_author_fk foreign key (last_author) references user(id) on delete set null on update cascade
+    constraint topic_last_author_fk foreign key (last_author) references user(id) on delete set null on update cascade
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -139,7 +139,7 @@ create table comment
     author int,
     content longtext,
     time timestamp default CURRENT_TIMESTAMP not null,
-    last_time timestamp,
+    last_time timestamp default CURRENT_TIMESTAMP not null,
     constraint comment_topic_fk foreign key (topic) references topic(id) on delete cascade on update cascade,
     constraint comment_author_fk foreign key (author) references user(id) on delete set null on update cascade
 )
