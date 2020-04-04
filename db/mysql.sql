@@ -157,5 +157,6 @@ create table reply
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-insert into user(id,name,passwd,account,regist_time,last_time,photo,class,num) value(1,'管理员','25d55ad283aa400af464c76d713c07ad','admin',now(),'2014-12-13',25,NULL,0);
+-- 默认管理员 admin/admin
+insert into user(id,name,passwd,account,regist_time,last_time,photo,class,num) value(1,'管理员','21232f297a57a5a743894a0e4a801fc3','admin',now(),'2014-12-13',25,NULL,0);
 insert into messages(user,origin,type,content) value(1,1,'alert','应用启动成功，快去管理界面完善数据吧！ <a href="/admin">管理中心</a>');
