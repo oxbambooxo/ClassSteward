@@ -10,6 +10,13 @@ create table regist
 )
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+create table regist_tmp
+(
+    id bigint primary key,
+    user_info text
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 create table class
 (
     name varchar(10) primary key

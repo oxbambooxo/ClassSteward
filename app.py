@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+import pymysql.cursors
 from flask import *
 import random
 import db
 import routine
 import time
+import json
 import datetime
 import jsonfix
 import static_path
@@ -46,16 +48,8 @@ def radio_news(origin,type,content):
     new.setDaemon(True)
     new.start()
 
-datadict={}
-def connect():
-    if 'db' in session:
-        if session['db'] not in datadict:
-            datadict[session['db']]=db.new()
-        conn=datadict[session['db']]
-        conn.ping()
-    else:
-        conn=db.new()
-    return conn
+def connect(**kwargs):    
+    return db.new(**kwargs)
 
 def delete(path):
     try:
@@ -124,30 +118,35 @@ def regist():
                     regist['userclass'].append(r[0])
             return render_template('regist',regist=regist,enumerate=enumerate)
         if request.args.get('check', None):
-            userinfo = db.memc.get(request.args.get('check').encode('utf-8'))
             #python2.7的python-memcached的键值不能是unicode,需要encode使其知道其编码.
-            if userinfo:
-                with connect() as cursor:
-                    sql="insert into user(name,passwd,account,regist_time,last_time,photo,class,num) value('{}','{}','{}','{}','{}','{}','{}','{}')".format(
-                        userinfo["name"].encode('utf-8'), userinfo["passwd"], userinfo["account"].encode('utf-8'), userinfo["regist_time"], userinfo["last_time"], userinfo["photo"], userinfo["class"],userinfo["num"])
-                    cursor.execute(sql)
-                    cursor.execute("select id,css,class,num,light from user where account='%s'" % userinfo['account'])
-                    # 注册时并没有分配id,是自增的.
-                    # 为了获得完整的userinfo(包含id),再查询一次.
-                    result=cursor.fetchone()
-                    userinfo['id']    = result[0]
-                    userinfo['css']   = result[1]
-                    userinfo['class'] = result[2]
-                    userinfo['num']   = result[3]
-                    userinfo['light'] = result[4]
-                for i in userinfo:
-                    session[i]=userinfo[i]
-                db.memc.delete(request.args.get('check').encode('utf-8'))
-                news(session['id'],1,"mail","欢迎注册 Law&apos;s courses!")
-                news(session['id'],1,"agree","欢迎来到 Law&apos;s courses!")
-                return render_template('regist', status='success',enumerate=enumerate)
-            else:
+            if not request.args.get('check'):
                 return redirect(url_for('regist'))
+            with connect(cursorclass=pymysql.cursors.DictCursor) as cursor:
+                seed = request.args['check']
+                cursor.execute("select user_info from regist_tmp where id=%s", seed)
+                data = cursor.fetchone()
+                if not data:
+                    return redirect(url_for('regist'))
+                userinfo = json.loads(data['user_info'])
+                sql="insert into user(name,passwd,account,regist_time,last_time,photo,class,num) value('{}','{}','{}','{}','{}','{}','{}','{}')".format(
+                    userinfo["name"].encode('utf-8'), userinfo["passwd"], userinfo["account"].encode('utf-8'), userinfo["regist_time"], userinfo["last_time"], userinfo["photo"], userinfo["class"],userinfo["num"])
+                cursor.execute(sql)
+                cursor.execute("select id,css,class,num,light from user where account='%s'" % userinfo['account'])
+                # 注册时并没有分配id,是自增的.
+                # 为了获得完整的userinfo(包含id),再查询一次.
+                result=cursor.fetchone()
+                userinfo['id']    = result['id']
+                userinfo['css']   = result['css']
+                userinfo['class'] = result['class']
+                userinfo['num']   = result['num']
+                userinfo['light'] = result['light']
+
+                cursor.execute("delete from regist_tmp where id=%s", seed)
+            for i in userinfo:
+                session[i]=userinfo[i]
+            news(session['id'],1,"mail","欢迎注册 Law&apos;s courses!")
+            news(session['id'],1,"agree","欢迎来到 Law&apos;s courses!")
+            return render_template('regist', status='success',enumerate=enumerate)
         if request.args.get('request', None):
             with connect() as cursor:
                 status = cursor.execute("select * from user where account=%s"%request.args.get('request'))
@@ -191,7 +190,8 @@ def regist():
                 userinfo['photo'] = seed
             else:
                 userinfo['photo'] = str(int(seed) % 25)
-            db.memc.set(seed, userinfo, 3600)
+            with connect() as cursor:
+                cursor.execute('insert into regist_tmp values(%s,%s)', [seed, json.dumps(userinfo)])
             return redirect(url_for('regist')+'?check='+seed)
         else:
             return render_template('regist',regist=regist,status='failed',enumerate=enumerate)
@@ -201,10 +201,8 @@ def logout():
     if 'id' in session:
         with connect() as cursor:
             cursor.execute("update user set last_time='%s' where id=%d"%(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time() - 120)), session['id']))
-            if 'db' in session and session['db'] in datadict:
-                del datadict[session['db']]
-            session.clear()
-            return redirect(url_for('syllabus'))
+        session.clear()
+        return redirect(url_for('syllabus'))
     else:
         return redirect(url_for('syllabus'))
 

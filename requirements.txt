@@ -4,5 +4,3 @@ itsdangerous==0.24
 werkzeug==0.9.6
 jinja2==2.7.3
 flask==0.10.1
-flask-memcache-session==2.0
-python-memcached==1.53
