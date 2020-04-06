@@ -6,6 +6,7 @@ import routine
 import time
 import datetime
 import jsonfix
+import static_path
 from functools import reduce
 import os
 import re
@@ -355,7 +356,9 @@ def admin():
                     old_filename=r[2]
                     cursor.execute("select homework from schedule where course='%s' and week='%s'"%(course,week))
                     new_filename=cursor.fetchone()[0].replace('AA',new_class).replace('BB',user_num).replace('CC',user_name)
-                    os.renames('./static/file/homework/'+course.encode('gbk')+'/'+str(week)+'/'+old_class.encode('gbk')+'/'+old_filename.encode('gbk'),'./static/file/homework/'+course.encode('gbk')+'/'+str(week)+'/'+new_class.encode('gbk')+'/'+new_filename.encode('gbk'))
+                    os.renames(
+                        static_path.homework(course, week, old_class, old_filename),
+                        static_path.homework(course, week, new_class, new_filename))
                     cursor.execute("update homework set filename='%s' where course='%s' and week='%s' and author='%s'"%(new_filename,course,week,user_id))
                 cursor.execute("update user set class='%s' where id='%s'"%(new_class,user_id))
             return "modify class success"
@@ -372,7 +375,9 @@ def admin():
                     old_filename=r[2]
                     cursor.execute("select homework from schedule where course='%s' and week='%s'"%(course,week))
                     new_filename=cursor.fetchone()[0].replace('AA',user_class).replace('BB',new_num).replace('CC',user_name)
-                    os.renames('./static/file/homework/'+course.encode('gbk')+'/'+str(week)+'/'+user_class.encode('gbk')+'/'+old_filename.encode('gbk'),'./static/file/homework/'+course.encode('gbk')+'/'+str(week)+'/'+user_class.encode('gbk')+'/'+new_filename.encode('gbk'))
+                    os.renames(
+                        static_path.homework(course, week, user_class, old_filename),
+                        static_path.homework(course, week, user_class, new_filename))
                     cursor.execute("update homework set filename='%s' where course='%s' and week='%s' and author='%s'"%(new_filename,course,week,user_id))
                 cursor.execute("update user set num='%s' where id='%s'"%(new_num,user_id))
             return "modify num success"
@@ -389,7 +394,9 @@ def admin():
                     old_filename=r[2]
                     cursor.execute("select homework from schedule where course='%s' and week='%s'"%(course,week))
                     new_filename=cursor.fetchone()[0].replace('AA',user_class).replace('BB',num).replace('CC',new_name)
-                    os.renames('./static/file/homework/'+course.encode('gbk')+'/'+str(week)+'/'+user_class.encode('gbk')+'/'+old_filename.encode('gbk'),'./static/file/homework/'+course.encode('gbk')+'/'+str(week)+'/'+user_class.encode('gbk')+'/'+new_filename.encode('gbk'))
+                    os.renames(
+                        static_path.homework(course, week, user_class, old_filename),
+                        static_path.homework(course, week, user_class, new_filename))
                     cursor.execute("update homework set filename='%s' where course='%s' and week='%s' and author='%s'"%(new_filename,course,week,user_id))
                 cursor.execute("update user set name='%s' where id='%s'"%(new_name,user_id))
             return "modify name success"
@@ -397,7 +404,7 @@ def admin():
             with connect() as cursor:
                 cursor.execute("select course,week,(select class from user where id=homework.author),filename from homework where author=(select id from user where account='%s')"%request.form['user_account'])
                 for r in cursor.fetchall():
-                    path="./static/file/homework/"+r[0].encode('gbk')+'/'+str(r[1])+'/'+r[2].encode('gbk')+'/'+r[3].encode('gbk')
+                    path=static_path.homework(r[0], r[1], r[2], r[3])
                     delete(path)
                 cursor.execute("delete from user where account='%s'"%request.form['user_account'])
             return "delete user success"
@@ -807,11 +814,11 @@ def schedule(path=None):
             coursework=''
             for f in request.files.getlist("schedule_work"):
                 coursework+='|'+f.filename
-                if f.filename:f.save('./static/file/schedule/coursework/'+f.filename.encode('gbk'))
+                if f.filename:f.save(static_path.schedule_coursework(f.filename))
             courseware=''
             for f in request.files.getlist("schedule_ware"):
                 courseware+='|'+f.filename
-                if f.filename:f.save('./static/file/schedule/courseware/'+f.filename.encode('gbk'))
+                if f.filename:f.save(static_path.schedule_courseware(f.filename))
             with connect() as cursor:
                 cursor.execute("insert into schedule(course,week,date_start,date_end,event,homework,homework_start,homework_end,coursework,courseware) value('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')"%(request.form['course_name'],request.form['schedule_week'],request.form['date_start'],request.form['date_end'],request.form['event'],request.form['homework'],request.form['homework_start'],request.form['homework_end'],coursework,courseware))
             radio_news(1,"plan",'老师刚刚更新了课程进度，快去看看吧: <a href="/schedule">课程进度</a>')
@@ -850,7 +857,7 @@ def schedule(path=None):
             courseware=''
             for f in request.files.getlist("addition_ware"):
                 courseware+='|'+f.filename
-                if f.filename:f.save('./static/file/schedule/courseware/'+f.filename.encode('gbk'))
+                if f.filename:f.save(static_path.schedule_courseware(f.filename))
             with connect() as cursor:
                 cursor.execute("select courseware from schedule where course='%s' and week='%s'"%(request.form['course'],request.form['week']))
                 result=cursor.fetchone()[0]
@@ -861,7 +868,7 @@ def schedule(path=None):
             coursework=''
             for f in request.files.getlist("addition_work"):
                 coursework+='|'+f.filename
-                if f.filename:f.save('./static/file/schedule/coursework/'+f.filename.encode('gbk'))
+                if f.filename:f.save(static_path.schedule_coursework(f.filename))
             with connect() as cursor:
                 cursor.execute("select coursework from schedule where course='%s' and week='%s'"%(request.form['course'],request.form['week']))
                 result=cursor.fetchone()[0]
@@ -874,7 +881,7 @@ def schedule(path=None):
                 cursor.execute("select courseware from schedule where course='%s' and week='%s'"%(request.form['course'],request.form['week']))
                 old_courseware=[i for i in cursor.fetchone()[0].split('|') if i]
                 old_courseware.remove(courseware)
-                delete('./static/file/schedule/courseware/'+courseware.encode('gbk'))
+                delete(static_path.schedule_courseware(courseware))
                 new_courseware=''
                 for i in old_courseware:
                     new_courseware+='|'+i
@@ -886,7 +893,7 @@ def schedule(path=None):
                 cursor.execute("select coursework from schedule where course='%s' and week='%s'"%(request.form['course'],request.form['week']))
                 old_coursework=[i for i in cursor.fetchone()[0].split('|') if i]
                 old_coursework.remove(coursework)
-                delete('./static/file/schedule/coursework/'+coursework.encode('gbk'))
+                delete(static_path.schedule_coursework(coursework))
                 new_coursework=''
                 for i in old_coursework:
                     new_coursework+='|'+i
@@ -901,7 +908,7 @@ def schedule(path=None):
 @app.route('/download', methods=['GET', 'POST'])
 def download():
     if request.method == 'GET':
-        f=[(i.decode('gbk'),os.stat('./static/file/teacher/'+i).st_ctime) for i in os.listdir('./static/file/teacher')]
+        f=static_path.teacher_files()
         f.sort(lambda x,y:int(y[1]-x[1]))
         for i,j in enumerate(f):
             f[i] = j[0],time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(j[1]))
@@ -1053,16 +1060,16 @@ def file():
         if "download" in request.form:
             import tarfile
             cwd=os.getcwd()
-            path='./static/file/homework/'+request.form['course']+'/'+request.form['week']+'/'+request.form['class']+'/'
+            path=static_path.homework_class(request.form['course'], request.form['week'], request.form['class'])
             tarname="./static/temp/"+request.form['course']+"_第".decode('utf8')+request.form['week']+"周_".decode('utf8')+request.form['class']+"班.tar.gz".decode('utf8')
-            tar=tarfile.open(tarname.encode('gbk'),"w:gz")
+            tar=tarfile.open(tarname.encode('utf-8'),"w:gz")
             for i in os.listdir(path):
                 tar.add(path+i,arcname=i)
             tar.close()
             return "files is compress sucess"
         if 'delete_directory' in request.form:
             import shutil
-            shutil.rmtree('./static/file/homework/'+request.form['path'].encode('gbk'))
+            shutil.rmtree('./static/file/homework/'+request.form['path'].encode('utf-8'))
             return "delete directory success"
 
 @app.route('/draw', methods=['GET', 'POST'])
